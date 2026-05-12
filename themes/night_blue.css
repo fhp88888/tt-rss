@@ -372,10 +372,6 @@ body.ttrss_main .hl .left {
   padding-left: 14px;
   padding-top: 14px;
 }
-body.ttrss_main .hl .left .row-state-control,
-body.ttrss_main .hl .left .dijitCheckBox {
-  display: none;
-}
 body.ttrss_main .hl .left .source-icon {
   display: inline-flex;
   align-items: center;
@@ -512,19 +508,14 @@ body.ttrss_main .hl.active .title a {
 body.ttrss_main .hl.active {
   background: #eef5f8 ! important;
 }
-body.ttrss_main .hl.active,
-body.ttrss_main .hl.Selected {
+body.ttrss_main .hl.active {
   color: #ccc;
   background: #eef5f8;
 }
 body.ttrss_main .hl.active a,
-body.ttrss_main .hl.Selected a,
 body.ttrss_main .hl.active .feed a,
-body.ttrss_main .hl.Selected .feed a,
 body.ttrss_main .hl.active .hl-content a.title,
-body.ttrss_main .hl.Selected .hl-content a.title,
-body.ttrss_main .hl.active span,
-body.ttrss_main .hl.Selected span {
+body.ttrss_main .hl.active span {
   color: inherit;
 }
 body.ttrss_main .hl:hover {
@@ -1024,19 +1015,7 @@ body.ttrss_main #toolbar-frame #toolbar #plugin-updates-available {
   padding-right: 4px;
   text-decoration: none;
 }
-body.ttrss_main #toolbar-frame #toolbar #selected_prompt {
-  font-style: italic;
-  text-align: right;
-  margin-right: 4px;
-  color: #257aa7;
-}
-@media (max-width: 768px) {
-  body.ttrss_main #toolbar-frame #toolbar #selected_prompt {
-    display: none;
-  }
-}
 @media (max-width: 576px) {
-  body.ttrss_main #toolbar-frame #toolbar .select-articles-dropdown,
   body.ttrss_main #toolbar-frame #toolbar .catchup-button {
     display: none;
   }
@@ -1508,10 +1487,6 @@ body.ttrss_utility hr {
   padding-left: 14px;
   padding-top: 14px;
 }
-.cdm .header .left .row-state-control,
-.cdm .header .left .dijitCheckBox {
-  display: none;
-}
 .cdm .header .left .source-icon {
   display: inline-flex;
   align-items: center;
@@ -1772,14 +1747,6 @@ body.ttrss_utility hr {
   position: absolute;
   top: 22px;
   width: 7px;
-}
-.cdm.expandable.Selected:not(.active) {
-  background: #eef5f8;
-}
-.cdm.expandable.Selected:not(.active) a,
-.cdm.expandable.Selected:not(.active) .header a.title,
-.cdm.expandable.Selected:not(.active) span {
-  color: inherit;
 }
 .cdm.expandable.active {
   background: #eef5f8 ! important;
@@ -2531,40 +2498,27 @@ body.flat.ttrss_main #headlines-frame {
 			background: @default-bg;
 		} */
 }
-body.flat.ttrss_main #headlines-frame .hl:not(.active):not(.Selected):not(.Unread),
-body.flat.ttrss_main #headlines-frame .cdm.expandable:not(.active):not(.Selected):not(.Unread) {
+body.flat.ttrss_main #headlines-frame .hl:not(.active):not(.Unread),
+body.flat.ttrss_main #headlines-frame .cdm.expandable:not(.active):not(.Unread) {
   background: #333;
 }
-body.flat.ttrss_main #headlines-frame .hl.Unread:not(.active):not(.Selected),
-body.flat.ttrss_main #headlines-frame .cdm.expandable.Unread:not(.active):not(.Selected) {
+body.flat.ttrss_main #headlines-frame .hl.Unread:not(.active),
+body.flat.ttrss_main #headlines-frame .cdm.expandable.Unread:not(.active) {
   background: #222;
 }
 body.flat.ttrss_main #headlines-frame .hl.Unread .title,
 body.flat.ttrss_main #headlines-frame .cdm.Unread .title {
   color: #e6e6e6;
 }
-body.flat.ttrss_main #headlines-frame .hl.active > *,
-body.flat.ttrss_main #headlines-frame .hl.Selected > *,
-body.flat.ttrss_main #headlines-frame .cdm.expandable.Selected > * {
+body.flat.ttrss_main #headlines-frame .hl.active > * {
   filter: invert(1);
 }
-body.flat.ttrss_main #headlines-frame .hl.active > * img,
-body.flat.ttrss_main #headlines-frame .hl.Selected > * img,
-body.flat.ttrss_main #headlines-frame .cdm.expandable.Selected > * img {
+body.flat.ttrss_main #headlines-frame .hl.active > * img {
   filter: invert(1);
 }
-body.flat.ttrss_main #headlines-frame .hl.active .dijitCheckBox,
-body.flat.ttrss_main #headlines-frame .hl.Selected .dijitCheckBox,
-body.flat.ttrss_main #headlines-frame .cdm.expandable.Selected .dijitCheckBox {
-  filter: invert(1);
-}
-body.flat.ttrss_main #headlines-frame .hl.Selected.marked i.marked-pic,
-body.flat.ttrss_main #headlines-frame .cdm.expandable.Selected.marked i.marked-pic,
 body.flat.ttrss_main #headlines-frame .hl.active.marked i.marked-pic {
   filter: invert(1);
 }
-body.flat.ttrss_main #headlines-frame .hl.Selected.published i.pub-pic,
-body.flat.ttrss_main #headlines-frame .cdm.expandable.Selected.published i.pub-pic,
 body.flat.ttrss_main #headlines-frame .hl.active.published i.pub-pic {
   filter: invert(1);
 }

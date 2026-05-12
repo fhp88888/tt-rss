@@ -411,11 +411,6 @@ body.ttrss_main {
 			padding-left : 14px;
 			padding-top : 14px;
 
-			.row-state-control,
-			.dijitCheckBox {
-				display : none;
-			}
-
 			.source-icon {
 				display : inline-flex;
 				align-items : center;
@@ -576,8 +571,7 @@ body.ttrss_main {
 			background : #eef5f8 ! important;
 		}
 
-		&.active,
-		&.Selected {
+		&.active {
 			color : @default-text;
 			background : #eef5f8;
 
@@ -1200,21 +1194,7 @@ body.ttrss_main {
 				text-decoration: none;
 			}
 
-			#selected_prompt {
-				font-style : italic;
-				text-align : right;
-				margin-right : 4px;
-				color : @color-accent;
-			}
-
-			@media (max-width: @breakpoint-md) {
-				#selected_prompt {
-					display : none;
-				}
-			}
-
 			@media (max-width: @breakpoint-sm) {
-				.select-articles-dropdown,
 				.catchup-button {
 					display : none;
 				}

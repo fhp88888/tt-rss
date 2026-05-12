@@ -28,36 +28,6 @@ const Article = {
 			return "trending_neutral";
 		}
 	},
-	selectionSetScore: function () {
-		const ids = Headlines.getSelected();
-
-		if (ids.length > 0) {
-			const score = prompt(__("Please enter new score for selected articles:"));
-
-			if (!isNaN(parseInt(score))) {
-				ids.forEach((id) => {
-					const row = document.getElementById(`RROW-${id}`);
-
-					if (row) {
-						row.setAttribute("data-score", score);
-
-						const pic = row.querySelector(".icon-score");
-
-						if (pic) {
-							pic.innerHTML = Article.getScorePic(score);
-							pic.setAttribute("title", score);
-						}
-
-						row.classList.remove('score-low', 'score-high', 'score-half-low', 'score-half-high', 'score-neutral');
-						row.classList.add(Article.getScoreClass(score));
-					}
-				});
-			}
-
-		} else {
-			alert(__("No articles selected."));
-		}
-	},
 	setScore: function (id, pic) {
 		const row = pic.closest("div[id*=RROW]");
 
@@ -128,17 +98,6 @@ const Article = {
 
 		Headlines.toggleUnread(id, 0);
 	},
-    selectionOpenInNewWindow: function () {
-        const ids = Headlines.getSelected();
-
-        if (ids.length > 0) {
-            ids.forEach((id) => {
-		        Article.openInNewWindow(id);
-            });
-        } else {
-            alert(__("No articles selected."));
-        }
-    },
 	renderNote: function (id, note) {
 		return `<div class="article-note" data-note-for="${id}" style="display : ${note ? "" : "none"}">
 				${App.FormFields.icon('note')} <div onclick class='body'>${note ? App.escapeHtml(note) : ""}</div>

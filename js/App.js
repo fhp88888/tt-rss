@@ -1078,13 +1078,19 @@ const App = {
             Feeds.cancelSearch();
          };
          this.hotkey_actions["toggle_mark"] = () => {
-            Headlines.selectionToggleMarked();
+            const id = Article.getActive();
+            if (id)
+               Headlines.toggleMark(id);
          };
          this.hotkey_actions["toggle_publ"] = () => {
-            Headlines.selectionTogglePublished();
+            const id = Article.getActive();
+            if (id)
+               Headlines.togglePub(id);
          };
          this.hotkey_actions["toggle_unread"] = () => {
-            Headlines.selectionToggleUnread({no_error: 1});
+            const id = Article.getActive();
+            if (id)
+               Headlines.toggleUnread(id);
          };
          this.hotkey_actions["edit_tags"] = () => {
             const id = Article.getActive();
@@ -1142,28 +1148,11 @@ const App = {
          };
          this.hotkey_actions["email_article"] = () => {
             if (typeof Plugins.Mail !== "undefined") {
-               Plugins.Mail.onHotkey(Headlines.getSelected());
+               const id = Article.getActive();
+               Plugins.Mail.onHotkey(id ? [id] : []);
             } else {
                alert(__("Please enable mail or mailto plugin first."));
             }
-         };
-         this.hotkey_actions["select_all"] = () => {
-            Headlines.select('all');
-         };
-         this.hotkey_actions["select_unread"] = () => {
-            Headlines.select('unread');
-         };
-         this.hotkey_actions["select_marked"] = () => {
-            Headlines.select('marked');
-         };
-         this.hotkey_actions["select_published"] = () => {
-            Headlines.select('published');
-         };
-         this.hotkey_actions["select_invert"] = () => {
-            Headlines.select('invert');
-         };
-         this.hotkey_actions["select_none"] = () => {
-            Headlines.select('none');
          };
          this.hotkey_actions["feed_refresh"] = () => {
             if (typeof Feeds.getActive() !== "undefined") {
@@ -1256,11 +1245,6 @@ const App = {
          this.hotkey_actions["goto_prefs"] = () => {
             App.openPreferences();
          };
-			this.hotkey_actions['select_article_cursor'] = () => {
-				const id = Article.getUnderPointer();
-				if (id)
-					document.getElementById(`RROW-${id}`)?.classList.toggle('Selected');
-			};
          this.hotkey_actions["create_label"] = () => {
             CommonDialogs.addLabel();
          };

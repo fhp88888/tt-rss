@@ -165,14 +165,6 @@ class Feeds extends Handler_Protected {
 		$reply['search_query'] = [$search, $search_language];
 		$reply['vfeed_group_enabled'] = $vfeed_group_enabled;
 
-
-		$plugin_menu_items = "";
-		PluginHost::getInstance()->chain_hooks_callback(PluginHost::HOOK_HEADLINE_TOOLBAR_SELECT_MENU_ITEM2,
-			function ($result) use (&$plugin_menu_items) {
-				$plugin_menu_items .= $result;
-			},
-			$feed, $cat_view);
-
 		$plugin_buttons = "";
 		PluginHost::getInstance()->chain_hooks_callback(PluginHost::HOOK_HEADLINE_TOOLBAR_BUTTON,
 			function ($result) use (&$plugin_buttons) {
@@ -185,7 +177,6 @@ class Feeds extends Handler_Protected {
 			'title' => strip_tags($feed_title),
 			'error' => $last_error,
 			'last_updated' => $last_updated,
-			'plugin_menu_items' => $plugin_menu_items,
 			'plugin_buttons' => $plugin_buttons,
 		];
 
