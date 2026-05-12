@@ -139,11 +139,45 @@ const	Feeds = {
 	openDefaultFeed: function() {
 		this.open({feed: this._default_feed_id});
 	},
-   onViewModeChanged: function() {
-		// TODO: is this still needed?
-      document.body.setAttribute('view-mode',
-			dijit.byId('toolbar-main').getValues().view_mode);
+	getToolbarValues: function() {
+		return {
+			view_mode: document.getElementById("toolbar-view-mode")?.value || "all_articles",
+			order_by: document.getElementById("toolbar-order-by")?.value || "feed_dates",
+		};
+	},
+	setUnreadOnly: function(unread_only, params = {}) {
+		const reload = params.reload !== false;
+		const view_mode = unread_only ? "unread" : "all_articles";
+		const input = document.getElementById("toolbar-view-mode");
 
+		if (input)
+			input.value = view_mode;
+
+		document.body.setAttribute("view-mode", view_mode);
+		this.updateToolbarButtons();
+
+		if (reload)
+			return Feeds.reloadCurrent("");
+	},
+	toggleUnreadOnly: function() {
+		return this.setUnreadOnly(this.getToolbarValues().view_mode !== "unread");
+	},
+	updateToolbarButtons: function() {
+		const btn = document.getElementById("toolbar-unread-toggle");
+
+		if (btn) {
+			const unread_only = this.getToolbarValues().view_mode === "unread";
+
+			btn.classList.toggle("active", unread_only);
+			btn.setAttribute("title", unread_only ? __("Show all") : __("Show unread only"));
+
+			const icon = btn.querySelector(".material-icons");
+
+			if (icon)
+				icon.innerHTML = unread_only ? "radio_button_checked" : "radio_button_unchecked";
+		}
+	},
+   onViewModeChanged: function() {
       return Feeds.reloadCurrent('');
    },
 	openNextUnread: function() {
@@ -304,10 +338,6 @@ const	Feeds = {
 			CommonDialogs.safeModeWarning();
 		}
 
-		dojo.connect(dijit.byId("main-catchup-dropdown"), 'onItemClick',
-			(item) => Feeds.catchupCurrent(item.option.value)
-		);
-
 		// bw_limit disables timeout() so we request initial counters separately
 		if (App.getInitParam("bw_limit")) {
 			this.requestCounters();
@@ -402,7 +432,7 @@ const	Feeds = {
 			}, 10 * 1000);
 		}
 
-		let query = {...{op: "Feeds", method: "view", feed: feed}, ...dojo.formToObject("toolbar-main")};
+		let query = {...{op: "Feeds", method: "view", feed: feed}, ...Feeds.getToolbarValues()};
 
 		if (method) query.m = method;
 

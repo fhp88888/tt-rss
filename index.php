@@ -176,44 +176,25 @@
 				<!-- order 10: headlines toolbar -->
 				<div id="toolbar-headlines" dojoType="fox.Toolbar" style="order : 10"> </div>
 
-				<!-- order 20: main toolbar contents (dropdowns) -->
+				<!-- order 20: main toolbar contents -->
 				<form id="toolbar-main" dojoType="dijit.form.Form" action="" style="order : 20" onsubmit="return false">
-					<select name="view_mode" title="<?= __('Show articles') ?>"
-						onchange="Feeds.onViewModeChanged()"
-						dojoType="fox.form.Select">
-						<option selected="selected" value="adaptive"><?= __('Adaptive') ?></option>
-						<option value="all_articles"><?= __('All Articles') ?></option>
-						<option value="marked"><?= __('Starred') ?></option>
-						<option value="published"><?= __('Published') ?></option>
-						<option value="unread"><?= __('Unread') ?></option>
-						<option value="has_note"><?= __('With Note') ?></option>
-					</select>
+					<input type="hidden" name="view_mode" id="toolbar-view-mode" value="all_articles">
+					<input type="hidden" name="order_by" id="toolbar-order-by" value="feed_dates">
 
-					<select title="<?= __('Sort articles') ?>"
-							onchange="Feeds.onViewModeChanged()"
-							dojoType="fox.form.Select" name="order_by">
+					<a href="#" class="toolbar-icon-button" title="<?= __('Refresh') ?>"
+						onclick="Feeds.reloadCurrent(); return false">
+						<i class="material-icons">refresh</i>
+					</a>
 
-						<option selected="selected" value="default"><?= __('Default') ?></option>
-							<option value="feed_dates"><?= __('Newest first') ?></option>
-							<option value="date_reverse"><?= __('Oldest first') ?></option>
-							<option value="title"><?= __('Title') ?></option>
+					<a href="#" class="toolbar-icon-button" id="toolbar-unread-toggle"
+						title="<?= __('Show unread only') ?>" onclick="Feeds.toggleUnreadOnly(); return false">
+						<i class="material-icons">radio_button_unchecked</i>
+					</a>
 
-						<?php
-							PluginHost::getInstance()->run_hooks_callback(PluginHost::HOOK_HEADLINES_CUSTOM_SORT_MAP, function ($result) {
-								foreach ($result as $sort_value => $sort_title) {
-									print "<option value=\"" . htmlspecialchars($sort_value) . "\">$sort_title</option>";
-								}
-							});
-						?>
-					</select>
-
-					<select class="catchup-button" id="main-catchup-dropdown" dojoType="fox.form.Select"
-						data-prevent-value-change="true">
-						<option value=""><?= __('Mark as read') ?></option>
-						<option value="1day"><?= __('Older than one day') ?></option>
-						<option value="1week"><?= __('Older than one week') ?></option>
-						<option value="2week"><?= __('Older than two weeks') ?></option>
-					</select>
+					<a href="#" class="toolbar-icon-button" title="<?= __('Mark as read') ?>"
+						onclick="Feeds.catchupCurrent(); return false">
+						<i class="material-icons">done_all</i>
+					</a>
 				</form>
 
 				<!-- toolbar actions dropdown: order 30 -->
@@ -288,6 +269,7 @@
                         <?php } ?>
                     </div>
                 </div>
+
             </div>
         </div> <!-- toolbar -->
         </div> <!-- toolbar pane -->

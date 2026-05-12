@@ -1004,6 +1004,36 @@ body.ttrss_main #toolbar-frame #toolbar #toolbar-headlines .right {
   display: flex;
   align-items: center;
 }
+body.ttrss_main #toolbar-frame #toolbar #toolbar-main {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  padding-right: 8px;
+}
+body.ttrss_main #toolbar-frame #toolbar #toolbar-main .toolbar-icon-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: #f5f5f5;
+  cursor: pointer;
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  text-decoration: none;
+  width: 28px;
+}
+body.ttrss_main #toolbar-frame #toolbar #toolbar-main .toolbar-icon-button:hover,
+body.ttrss_main #toolbar-frame #toolbar #toolbar-main .toolbar-icon-button.active {
+  background: #eef5f8;
+  color: #b87d2c;
+}
+body.ttrss_main #toolbar-frame #toolbar #toolbar-main .toolbar-icon-button i.material-icons {
+  font-size: 20px;
+  margin: 0;
+}
 body.ttrss_main #toolbar-frame #toolbar #updates-available {
   color: #69C671;
   padding-right: 4px;
@@ -1013,11 +1043,6 @@ body.ttrss_main #toolbar-frame #toolbar #plugin-updates-available {
   color: #b3e2b7;
   padding-right: 4px;
   text-decoration: none;
-}
-@media (max-width: 576px) {
-  body.ttrss_main #toolbar-frame #toolbar .catchup-button {
-    display: none;
-  }
 }
 body.ttrss_main #header {
   text-align: right;

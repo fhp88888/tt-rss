@@ -234,7 +234,7 @@ const Headlines = {
 		}
 	},
 	loadMore: function () {
-		const view_mode = dijit.byId("toolbar-main").getValues().view_mode;
+		const view_mode = Feeds.getToolbarValues().view_mode;
 		const unread_in_buffer = document.querySelectorAll('#headlines-frame > div[id*=RROW][class*=Unread]').length;
 		const num_all = document.querySelectorAll('#headlines-frame > div[id*=RROW]').length;
 		const num_unread = Feeds.getUnread(Feeds.getActive(), Feeds.activeIsCat());
@@ -794,17 +794,6 @@ const Headlines = {
 		PluginHost.run(PluginHost.HOOK_HEADLINES_RENDERED);
 
 		Notify.close();
-	},
-	reverse: function () {
-		const toolbar = dijit.byId("toolbar-main");
-		let order_by = toolbar.getValues().order_by;
-
-		if (order_by !== "date_reverse")
-			order_by = "date_reverse";
-		else
-			order_by = App.getInitParam("default_view_order_by");
-
-		toolbar.setValues({order_by: order_by});
 	},
 	toggleMark: function (id) {
 		document.getElementById(`RROW-${id}`)?.classList.toggle('marked');

@@ -848,10 +848,7 @@ const App = {
                }
             });
 
-         dijit.byId('toolbar-main').setValues({
-            view_mode: this.getInitParam("default_view_mode"),
-            order_by: this.getInitParam("default_view_order_by")
-         });
+         Feeds.setUnreadOnly(false, {reload: false});
 
          this.setLoadingProgress(50);
 
@@ -1182,7 +1179,7 @@ const App = {
 				let query = {
 					...{op: "Feeds", method: "view", feed: Feeds.getActive(), timestamps: 1,
 							debug: 1, cat: Feeds.activeIsCat(), csrf_token: __csrf_token},
-					...dojo.formToObject("toolbar-main")
+					...Feeds.getToolbarValues()
 				};
 
 				if (Feeds._search_query) {
@@ -1204,9 +1201,6 @@ const App = {
             if (typeof Feeds.getActive() !== "undefined") {
                Feeds.catchupCurrent();
             }
-         };
-         this.hotkey_actions["feed_reverse"] = () => {
-            Headlines.reverse();
          };
          this.hotkey_actions["feed_toggle_grid"] = () => {
             xhr.json("backend.php", {op: "RPC", method: "togglepref", key: "CDM_ENABLE_GRID"}, (reply) => {
