@@ -75,6 +75,18 @@ body.ttrss_main .post .header .article-meta-row {
   color: #ffffff;
   font-size: 11px;
 }
+body.ttrss_main .post .header .article-meta-row .author,
+body.ttrss_main .post .header .article-meta-row .date {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+body.ttrss_main .post .header .article-meta-row .author i.material-icons,
+body.ttrss_main .post .header .article-meta-row .date i.material-icons {
+  color: #ffffff;
+  font-size: 16px;
+  margin: 0;
+}
 body.ttrss_main .post .header .article-source {
   display: inline-flex;
   align-items: center;

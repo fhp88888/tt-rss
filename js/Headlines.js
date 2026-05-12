@@ -515,7 +515,6 @@ const Headlines = {
 									${App.getInitParam("debug_headline_ids") ? `<span class="text-muted small">A: ${hl.id} F: ${hl.feed_id}</span>` : ""}
 									<a class="title" title="${App.escapeHtml(hl.title)}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">
 										${hl.title}</a>
-									<span class="author">${hl.author}</span>
 									${Article.renderLabels(hl.id, hl.labels)}
 								</span>
 								${hl.cdm_excerpt ? `<span class="headline-preview">${hl.cdm_excerpt}</span>` : ""}
@@ -581,7 +580,6 @@ const Headlines = {
 				</div>
 				<span data-article-id="${hl.id}" class="hl-content headline-title-line hlMenuAttach">
 					<a class="title" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">${hl.title}</a>
-					<span class="author">${hl.author}</span>
 					${Article.renderLabels(hl.id, hl.labels)}
 				</span>
 				<span class="${preview_class} headline-preview">${hl.content_preview}</span>

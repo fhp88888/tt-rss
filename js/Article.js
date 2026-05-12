@@ -310,8 +310,8 @@ const Article = {
 								</span>
 								<span>${App.escapeHtml(hl.feed_title)}</span>
 							</div>
-							${hl.author ? `<div class="author">${hl.author}</div>` : ""}
-							<div class="date">${hl.updated_long}</div>
+							${hl.author ? `<div class="author"><i class="material-icons">person_outline</i><span>${hl.author}</span></div>` : ""}
+							<div class="date"><i class="material-icons">event</i><span>${hl.updated_long}</span></div>
 						</div>
 						<div class="article-actions-row">
 							<div class="buttons left">${hl.buttons_left}</div>

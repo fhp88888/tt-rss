@@ -56,6 +56,19 @@ body.ttrss_main {
 				margin-bottom : 18px;
 				color : lighten(@default-text, 20%);
 				font-size : @font-size-small;
+
+				.author,
+				.date {
+					display : inline-flex;
+					align-items : center;
+					gap : 5px;
+
+					i.material-icons {
+						color : lighten(@default-text, 24%);
+						font-size : 16px;
+						margin : 0;
+					}
+				}
 			}
 
 			.article-source {
