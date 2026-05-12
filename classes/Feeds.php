@@ -330,6 +330,7 @@ class Feeds extends Handler_Protected {
 					$line["enclosures"] = [ 'formatted' => '', 'entries' => [] ];
 				}
 
+				$line["updated_ts"] = strtotime($line["updated"] ?? '') ?: 0;
 				$line["updated_long"] = TimeHelper::make_local_datetime($line["updated"]);
 				$line["updated"] = TimeHelper::make_local_datetime($line["updated"], eta_min: true);
 

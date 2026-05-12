@@ -453,6 +453,7 @@ const Headlines = {
 	render: function (headlines, hl) {
 		let row = null;
 		const preview_class = hl.content_preview_is_ai ? "preview ai-summary" : "preview";
+		const relative_time = this.formatRelativeTime(hl.updated_ts);
 
 		let row_class = "";
 
@@ -499,9 +500,10 @@ const Headlines = {
 						<div class="header-sticky-guard"></div>
 						<div class="header">
 							<div class="left">
-								<input dojoType="dijit.form.CheckBox" type="checkbox" onclick="Headlines.onRowChecked(this)" class='rchk'>
-								<i class="marked-pic marked-${hl.id} material-icons" onclick="Headlines.toggleMark(${hl.id})">star</i>
-								<i class="pub-pic pub-${hl.id} material-icons" onclick="Headlines.togglePub(${hl.id})">rss_feed</i>
+								<input dojoType="dijit.form.CheckBox" type="checkbox" onclick="Headlines.onRowChecked(this)" class='rchk row-state-control'>
+								<span class="icon-feed source-icon" title="${App.escapeHtml(hl.feed_title)}" onclick="Feeds.open({feed:${hl.feed_id}})">
+									${Feeds.renderIcon(hl.feed_id, hl.has_icon)}
+								</span>
 							</div>
 
 							<span onclick="return Headlines.click(event, ${hl.id});" data-article-id="${hl.id}" class="titleWrap hlMenuAttach">
@@ -513,18 +515,13 @@ const Headlines = {
 								${hl.cdm_excerpt ? hl.cdm_excerpt : ""}
 							</span>
 
+							<span class="relative-time" title="${App.escapeHtml(hl.updated_long)}">${relative_time}</span>
+
 							<a class="feed vfeedMenuAttach" style="background-color: ${hl.feed_bg_color}" data-feed-id="${hl.feed_id}"
 								title="${__('Open site')}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
 
-							<span class="updated" title="${hl.imported}">${hl.updated}</span>
-
 							<div class="right">
 								<i class="material-icons icon-grid-span" title="${__("Span all columns")}" onclick="Article.cdmToggleGridSpan(${hl.id})">fullscreen</i>
-								<i class="material-icons icon-score" title="${hl.score}" onclick="Article.setScore(${hl.id}, this)">${Article.getScorePic(hl.score)}</i>
-
-								<span class="icon-feed" title="${App.escapeHtml(hl.feed_title)}" onclick="Feeds.open({feed:${hl.feed_id}})">
-									${Feeds.renderIcon(hl.feed_id, hl.has_icon)}
-								</span>
 							</div>
 
 						</div>
@@ -570,9 +567,8 @@ const Headlines = {
 				onmouseover="Article.mouseIn(${hl.id})"
 				onmouseout="Article.mouseOut(${hl.id})">
 			<div class="left">
-				<input dojoType="dijit.form.CheckBox" type="checkbox" onclick="Headlines.onRowChecked(this)" class='rchk'>
-					<i class="marked-pic marked-${hl.id} material-icons" onclick="Headlines.toggleMark(${hl.id})">star</i>
-					<i class="pub-pic pub-${hl.id} material-icons" onclick="Headlines.togglePub(${hl.id})">rss_feed</i>
+				<input dojoType="dijit.form.CheckBox" type="checkbox" onclick="Headlines.onRowChecked(this)" class='rchk row-state-control'>
+				<span onclick="Feeds.open({feed:${hl.feed_id}})" class="icon-feed source-icon" title="${App.escapeHtml(hl.feed_title)}">${Feeds.renderIcon(hl.feed_id, hl.has_icon)}</span>
 			</div>
 			<div onclick="return Headlines.click(event, ${hl.id})" class="title">
 				${App.getInitParam("debug_headline_ids") ? `<span class="text-muted small">A: ${hl.id} F: ${hl.feed_id}</span>` : ""}
@@ -585,13 +581,7 @@ const Headlines = {
 			<span class="feed vfeedMenuAttach" data-feed-id="${hl.feed_id}">
 				<a title="${__('Open site')}" style="background : ${hl.feed_bg_color}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
 			</span>
-			<div title="${hl.imported}">
-				<span class="updated">${hl.updated}</span>
-			</div>
-			<div class="right">
-				<i class="material-icons icon-score" title="${hl.score}" onclick="Article.setScore(${hl.id}, this)">${Article.getScorePic(hl.score)}</i>
-				<span onclick="Feeds.open({feed:${hl.feed_id}})" class="icon-feed" title="${App.escapeHtml(hl.feed_title)}">${Feeds.renderIcon(hl.feed_id, hl.has_icon)}</span>
-			</div>
+			<span class="relative-time" title="${App.escapeHtml(hl.updated_long)}">${relative_time}</span>
 			</div>
 		`;
 		}
@@ -605,6 +595,29 @@ const Headlines = {
 		PluginHost.run(PluginHost.HOOK_HEADLINE_RENDERED, tmp.firstChild);
 
 		return tmp.firstChild;
+	},
+	formatRelativeTime: function (timestamp) {
+		const ts = parseInt(timestamp);
+
+		if (!ts) return "";
+
+		const elapsed_seconds = Math.max(0, Math.floor(Date.now() / 1000) - ts);
+		const elapsed_minutes = Math.floor(elapsed_seconds / 60);
+
+		if (elapsed_minutes < 1) return "just now";
+		if (elapsed_minutes === 1) return "1 minute ago";
+		if (elapsed_minutes < 60) return `${elapsed_minutes} minutes ago`;
+
+		const elapsed_hours = Math.floor(elapsed_minutes / 60);
+
+		if (elapsed_hours === 1) return "an hour ago";
+		if (elapsed_hours < 24) return `${elapsed_hours} hours ago`;
+
+		const elapsed_days = Math.floor(elapsed_hours / 24);
+
+		if (elapsed_days === 1) return "a day ago";
+
+		return `${elapsed_days} days ago`;
 	},
 	updateCurrentUnread: function () {
 		if (document.getElementById("feed_current_unread")) {

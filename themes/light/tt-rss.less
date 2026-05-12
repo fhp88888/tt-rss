@@ -281,6 +281,25 @@ body.ttrss_main {
 			}
 		}
 
+		.left {
+			align-self : flex-start;
+			flex-shrink : 0;
+
+			.row-state-control,
+			.dijitCheckBox {
+				display : none;
+			}
+
+			.source-icon {
+				display : inline-flex;
+				align-items : center;
+				justify-content : center;
+				width : 24px;
+				min-width : 24px;
+				cursor : pointer;
+			}
+		}
+
 		.right {
 			text-align : right;
 
@@ -294,6 +313,14 @@ body.ttrss_main {
 			flex-grow : 2;
 			overflow : hidden;
 			text-overflow : ellipsis;
+		}
+
+		.relative-time {
+			color : @default-text;
+			flex-shrink : 0;
+			font-size : @font-size-small;
+			margin-left : auto;
+			text-align : right;
 		}
 
 		.author {

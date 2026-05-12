@@ -43,8 +43,10 @@ const Article = {
 
 						const pic = row.querySelector(".icon-score");
 
-						pic.innerHTML = Article.getScorePic(score);
-						pic.setAttribute("title", score);
+						if (pic) {
+							pic.innerHTML = Article.getScorePic(score);
+							pic.setAttribute("title", score);
+						}
 
 						row.classList.remove('score-low', 'score-high', 'score-half-low', 'score-half-high', 'score-neutral');
 						row.classList.add(Article.getScoreClass(score));
@@ -68,8 +70,10 @@ const Article = {
 
 				const pic = row.querySelector(".icon-score");
 
-				pic.innerHTML = Article.getScorePic(score);
-				pic.setAttribute("title", score);
+				if (pic) {
+					pic.innerHTML = Article.getScorePic(score);
+					pic.setAttribute("title", score);
+				}
 
 				row.classList.remove('score-low', 'score-high', 'score-half-low', 'score-half-high', 'score-neutral');
 				row.classList.add(Article.getScoreClass(score));

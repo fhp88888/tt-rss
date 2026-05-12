@@ -256,6 +256,22 @@ body.ttrss_main .hl .right i.material-icons {
   user-select: none;
   font-size: 21px;
 }
+body.ttrss_main .hl .left {
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+body.ttrss_main .hl .left .row-state-control,
+body.ttrss_main .hl .left .dijitCheckBox {
+  display: none;
+}
+body.ttrss_main .hl .left .source-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  min-width: 24px;
+  cursor: pointer;
+}
 body.ttrss_main .hl .right {
   text-align: right;
 }
@@ -267,6 +283,13 @@ body.ttrss_main .hl .title {
   flex-grow: 2;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+body.ttrss_main .hl .relative-time {
+  color: #ccc;
+  flex-shrink: 0;
+  font-size: 11px;
+  margin-left: auto;
+  text-align: right;
 }
 body.ttrss_main .hl .author {
   white-space: nowrap;
@@ -1303,9 +1326,31 @@ body.ttrss_utility hr {
   user-select: none;
   font-size: 21px;
 }
+.cdm .header .left {
+  flex-shrink: 0;
+}
+.cdm .header .left .row-state-control,
+.cdm .header .left .dijitCheckBox {
+  display: none;
+}
+.cdm .header .left .source-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  min-width: 24px;
+  cursor: pointer;
+}
 .cdm .header .titleWrap {
   flex-grow: 2;
   width: 0;
+}
+.cdm .header .relative-time {
+  color: #ccc;
+  flex-shrink: 0;
+  font-size: 11px;
+  margin-left: auto;
+  text-align: right;
 }
 .cdm .header .updated {
   color: #ccc;

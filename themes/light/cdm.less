@@ -43,9 +43,35 @@
 			}
 		}
 
+		.left {
+			flex-shrink : 0;
+
+			.row-state-control,
+			.dijitCheckBox {
+				display : none;
+			}
+
+			.source-icon {
+				display : inline-flex;
+				align-items : center;
+				justify-content : center;
+				width : 24px;
+				min-width : 24px;
+				cursor : pointer;
+			}
+		}
+
 		.titleWrap {
 			flex-grow : 2;
 			width : 0;
+		}
+
+		.relative-time {
+			color : @default-text;
+			flex-shrink : 0;
+			font-size : @font-size-small;
+			margin-left : auto;
+			text-align : right;
 		}
 
 		.updated {
