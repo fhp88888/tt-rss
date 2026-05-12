@@ -238,6 +238,8 @@ class Feeds extends Handler_Protected {
 					$line["feed_title"] = __("Archived articles");
 				}
 
+				$line["feed_title"] ??= strip_tags($feed_title);
+
 				$feed_id = $line["feed_id"];
 
 				if ($line["num_labels"] > 0) {
@@ -260,8 +262,6 @@ class Feeds extends Handler_Protected {
 
 				if (count($topmost_article_ids) < 3)
 					$topmost_article_ids[] = $id;
-
-				$line["feed_title"] ??= "";
 
 				$button_doc = new DOMDocument();
 

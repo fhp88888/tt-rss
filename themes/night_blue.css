@@ -896,8 +896,8 @@ body.ttrss_main #headlines-frame {
 }
 body.ttrss_main #headlines-frame[data-is-vfeed="false"] .header .feed,
 body.ttrss_main #headlines-frame[data-is-vfeed="false"] .hl .feed,
-body.ttrss_main #headlines-frame[data-is-vfeed="false"] .header .icon-feed,
-body.ttrss_main #headlines-frame[data-is-vfeed="false"] .hl .icon-feed {
+body.ttrss_main #headlines-frame[data-is-vfeed="false"] .header .icon-feed:not(.source-icon),
+body.ttrss_main #headlines-frame[data-is-vfeed="false"] .hl .icon-feed:not(.source-icon) {
   display: none;
 }
 body.ttrss_main #headlines-frame[data-auto-catchup="true"] #headlines-spacer {
