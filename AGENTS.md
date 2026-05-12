@@ -95,3 +95,21 @@ When committing:
 - Stage only files relevant to the completed work.
 - Use concise commit messages.
 - Push to `origin/main` only when the user asks for push or explicitly approves it.
+
+Before every push, explicitly check for personal/local data:
+
+```bash
+git status --short --branch
+git diff --stat
+git diff --cached --stat
+```
+
+Do not commit or push:
+
+- OPML subscription lists or feed exports.
+- `.env`, local credentials, tokens, cookies, or session data.
+- Database dumps, backups, imported feed data, or user settings.
+- Cache, lock, upload, generated runtime files, logs, and temporary files.
+- OS/editor metadata such as `.DS_Store` or local IDE settings.
+
+If any personal/local file appears in status or staged diff, unstage it and leave it local unless the user explicitly says otherwise.
