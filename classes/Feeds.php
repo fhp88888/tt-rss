@@ -209,10 +209,10 @@ class Feeds extends Handler_Protected {
 					$line["content_preview"] = "";
 					$line["content_preview_is_ai"] = false;
 				} else if (!empty($line["ai_summary"]) && $line["ai_summary_content_hash"] === $line["content_hash"]) {
-					$line["content_preview"] = "&mdash; " . Sanitizer::sanitize($line["ai_summary"]);
+					$line["content_preview"] = Sanitizer::sanitize($line["ai_summary"]);
 					$line["content_preview_is_ai"] = true;
 				} else {
-					$line["content_preview"] =  "&mdash; " . truncate_string(strip_tags($line["content"]), 250);
+					$line["content_preview"] = truncate_string(strip_tags($line["content"]), 250);
 					$line["content_preview_is_ai"] = false;
 
 					$max_excerpt_length = 250;

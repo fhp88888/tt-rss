@@ -506,16 +506,20 @@ const Headlines = {
 								</span>
 							</div>
 
-							<span onclick="return Headlines.click(event, ${hl.id});" data-article-id="${hl.id}" class="titleWrap hlMenuAttach">
-								${App.getInitParam("debug_headline_ids") ? `<span class="text-muted small">A: ${hl.id} F: ${hl.feed_id}</span>` : ""}
-								<a class="title" title="${App.escapeHtml(hl.title)}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">
-									${hl.title}</a>
-								<span class="author">${hl.author}</span>
-								${Article.renderLabels(hl.id, hl.labels)}
-								${hl.cdm_excerpt ? hl.cdm_excerpt : ""}
+							<span onclick="return Headlines.click(event, ${hl.id});" data-article-id="${hl.id}" class="titleWrap headline-main hlMenuAttach">
+								<span class="headline-meta">
+									<span class="feed-name">${App.escapeHtml(hl.feed_title)}</span>
+									<span class="relative-time" title="${App.escapeHtml(hl.updated_long)}">${relative_time}</span>
+								</span>
+								<span class="headline-title-line">
+									${App.getInitParam("debug_headline_ids") ? `<span class="text-muted small">A: ${hl.id} F: ${hl.feed_id}</span>` : ""}
+									<a class="title" title="${App.escapeHtml(hl.title)}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">
+										${hl.title}</a>
+									<span class="author">${hl.author}</span>
+									${Article.renderLabels(hl.id, hl.labels)}
+								</span>
+								${hl.cdm_excerpt ? `<span class="headline-preview">${hl.cdm_excerpt}</span>` : ""}
 							</span>
-
-							<span class="relative-time" title="${App.escapeHtml(hl.updated_long)}">${relative_time}</span>
 
 							<a class="feed vfeedMenuAttach" style="background-color: ${hl.feed_bg_color}" data-feed-id="${hl.feed_id}"
 								title="${__('Open site')}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
@@ -570,18 +574,18 @@ const Headlines = {
 				<input dojoType="dijit.form.CheckBox" type="checkbox" onclick="Headlines.onRowChecked(this)" class='rchk row-state-control'>
 				<span onclick="Feeds.open({feed:${hl.feed_id}})" class="icon-feed source-icon" title="${App.escapeHtml(hl.feed_title)}">${Feeds.renderIcon(hl.feed_id, hl.has_icon)}</span>
 			</div>
-			<div onclick="return Headlines.click(event, ${hl.id})" class="title">
-				${App.getInitParam("debug_headline_ids") ? `<span class="text-muted small">A: ${hl.id} F: ${hl.feed_id}</span>` : ""}
-				<span data-article-id="${hl.id}" class="hl-content hlMenuAttach">
-					<a class="title" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">${hl.title} <span class="${preview_class}">${hl.content_preview}</span></a>
+			<div onclick="return Headlines.click(event, ${hl.id})" class="title headline-main">
+				<div class="headline-meta">
+					<span class="feed-name">${App.escapeHtml(hl.feed_title)}</span>
+					<span class="relative-time" title="${App.escapeHtml(hl.updated_long)}">${relative_time}</span>
+				</div>
+				<span data-article-id="${hl.id}" class="hl-content headline-title-line hlMenuAttach">
+					<a class="title" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">${hl.title}</a>
 					<span class="author">${hl.author}</span>
 					${Article.renderLabels(hl.id, hl.labels)}
 				</span>
+				<span class="${preview_class} headline-preview">${hl.content_preview}</span>
 			</div>
-			<span class="feed vfeedMenuAttach" data-feed-id="${hl.feed_id}">
-				<a title="${__('Open site')}" style="background : ${hl.feed_bg_color}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
-			</span>
-			<span class="relative-time" title="${App.escapeHtml(hl.updated_long)}">${relative_time}</span>
 			</div>
 		`;
 		}

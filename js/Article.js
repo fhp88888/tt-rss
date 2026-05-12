@@ -1,6 +1,6 @@
 'use strict'
 
-/* global __, ngettext, App, Headlines, xhr, PluginHost, Notify, fox */
+/* global __, ngettext, App, Headlines, Feeds, xhr, PluginHost, Notify, fox */
 
 const Article = {
 	_scroll_reset_timeout: false,
@@ -298,20 +298,24 @@ const Article = {
 
 				const article = `<div class="post post-${hl.id}" data-article-id="${hl.id}">
 					<div class="header">
-						<div class="row">
+						<div class="article-title-row">
 							<div class="title"><a target="_blank" rel="noopener noreferrer"
 								title="${App.escapeHtml(hl.title)}"
 								href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">${hl.title}</a></div>
+						</div>
+						<div class="article-meta-row">
+							<div class="article-source" onclick="Feeds.open({feed:${hl.feed_id}})">
+								<span class="icon-feed source-icon" title="${App.escapeHtml(hl.feed_title)}">
+									${Feeds.renderIcon(hl.feed_id, hl.has_icon)}
+								</span>
+								<span>${App.escapeHtml(hl.feed_title)}</span>
+							</div>
+							${hl.author ? `<div class="author">${hl.author}</div>` : ""}
 							<div class="date">${hl.updated_long}</div>
 						</div>
-						<div class="row">
+						<div class="article-actions-row">
 							<div class="buttons left">${hl.buttons_left}</div>
 							<div class="comments">${comments}</div>
-							<div class="author">${hl.author}</div>
-							<i class="material-icons">label_outline</i>
-							${Article.renderTags(hl.id, hl.tags)}
-							&nbsp;<a title="${__("Edit tags for this article")}" href="#"
-								onclick="Article.editTags(${hl.id})">(+)</a>
 							<div class="buttons right">${hl.buttons}</div>
 						</div>
 					</div>

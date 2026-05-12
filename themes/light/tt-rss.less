@@ -14,27 +14,84 @@ body.ttrss_main {
 	}
 
 	.post {
-		padding : 0;
+		box-sizing : border-box;
+		margin : 0 auto;
+		max-width : 820px;
+		min-height : 100%;
+		padding : 42px 28px 80px;
 		font-size : @font-size-toolbar;
+		background : @default-bg;
 
 		.header {
-			padding : 5px;
+			margin : 0 auto 28px;
+			padding : 0;
 			color : @default-text;
-			border: 0 solid @border-default;
-			border-bottom-width: 1px;
-			background: @color-panel-bg;
+			border : 0;
+			background : transparent;
 
 			.left, .right {
 				display : flex;
 				align-items : center;
 			}
 
-			.row {
+			.row,
+			.article-actions-row {
 				display : flex;
-				margin-bottom : 4px;
+				margin-bottom : 0;
 				flex-wrap : nowrap;
 				align-items : center;
 				justify-content : space-between;
+			}
+
+			.article-title-row {
+				display : block;
+				margin-bottom : 14px;
+			}
+
+			.article-meta-row {
+				display : flex;
+				align-items : center;
+				flex-wrap : wrap;
+				gap : 8px 18px;
+				margin-bottom : 18px;
+				color : lighten(@default-text, 20%);
+				font-size : @font-size-small;
+			}
+
+			.article-source {
+				display : inline-flex;
+				align-items : center;
+				gap : 6px;
+				min-width : 0;
+				font-weight : 600;
+				cursor : pointer;
+
+				.source-icon {
+					display : inline-flex;
+					align-items : center;
+					justify-content : center;
+					width : 18px;
+					height : 18px;
+				}
+			}
+
+			.article-actions-row {
+				gap : 12px;
+				padding : 10px 0 0;
+				border-top : 1px solid fade(@border-default, 80%);
+				color : lighten(@default-text, 16%);
+				font-size : @font-size-small;
+
+				.buttons.right [data-plugin-name="Note"] {
+					display : none;
+				}
+			}
+
+			.article-tags {
+				display : inline-flex;
+				align-items : center;
+				gap : 4px;
+				min-width : 0;
 			}
 
 			.comments {
@@ -54,11 +111,17 @@ body.ttrss_main {
 
 			.title {
 				flex-grow : 2;
-				font-size : 15px;
-				font-weight : 600;
+				font-size : 28px;
+				font-weight : 700;
+				line-height : 1.25;
 				text-rendering: optimizelegibility;
 				font-family : @fonts-ui;
-				word-break : break-all;
+				word-break : normal;
+				overflow-wrap : anywhere;
+
+				a {
+					color : #202124;
+				}
 			}
 
 			.tags {
@@ -70,14 +133,25 @@ body.ttrss_main {
 		}
 
 		div.content {
-			padding : 10px;
+			padding : 0;
 			font-size : 16px;
+			line-height : 1.72;
+			color : #242424;
+
+			> * {
+				max-width : 100%;
+			}
+
+			p {
+				margin : 0 0 1.05em;
+			}
 
 			img,
 			video {
 				border-width : 0;
-				max-width : 98%;
+				max-width : 100%;
 				height: auto;
+				border-radius : 6px;
 			}
 
 			div.embed-responsive {
@@ -251,13 +325,15 @@ body.ttrss_main {
 		display : flex;
 		flex-direction: row;
 		flex-wrap: nowrap;
-		background : @color-panel-bg;
-		align-items : center;
+		background : #fafafa;
+		align-items : flex-start;
+		position : relative;
 		user-select : none;
+		min-height : 88px;
 
 		> * {
-			white-space : nowrap;
-			padding : 4px;
+			white-space : normal;
+			padding : 10px 8px;
 		}
 
 		img {
@@ -284,6 +360,8 @@ body.ttrss_main {
 		.left {
 			align-self : flex-start;
 			flex-shrink : 0;
+			padding-left : 14px;
+			padding-top : 14px;
 
 			.row-state-control,
 			.dijitCheckBox {
@@ -294,9 +372,16 @@ body.ttrss_main {
 				display : inline-flex;
 				align-items : center;
 				justify-content : center;
-				width : 24px;
-				min-width : 24px;
+				width : 26px;
+				height : 26px;
+				min-width : 26px;
 				cursor : pointer;
+
+				img {
+					width : 20px;
+					height : 20px;
+					border-radius : 5px;
+				}
 			}
 		}
 
@@ -313,21 +398,66 @@ body.ttrss_main {
 			flex-grow : 2;
 			overflow : hidden;
 			text-overflow : ellipsis;
+			min-width : 0;
 		}
 
 		.relative-time {
-			color : @default-text;
+			color : lighten(@default-text, 26%);
 			flex-shrink : 0;
 			font-size : @font-size-small;
 			margin-left : auto;
 			text-align : right;
+			white-space : nowrap;
 		}
 
 		.author {
 			white-space : nowrap;
-			color : @default-text;
+			color : lighten(@default-text, 24%);
 			font-size : @font-size-small;
 			font-weight : normal;
+			margin-left : 6px;
+		}
+
+		.headline-main {
+			display : flex;
+			flex-direction : column;
+			gap : 5px;
+			min-width : 0;
+			padding-right : 14px;
+		}
+
+		.headline-meta {
+			display : flex;
+			align-items : center;
+			gap : 8px;
+			color : lighten(@default-text, 26%);
+			font-size : @font-size-small;
+			font-weight : 600;
+			line-height : 1.2;
+			min-width : 0;
+		}
+
+		.feed-name {
+			overflow : hidden;
+			text-overflow : ellipsis;
+			white-space : nowrap;
+		}
+
+		.headline-title-line {
+			display : block;
+			min-width : 0;
+			line-height : 1.32;
+		}
+
+		.headline-preview {
+			color : lighten(@default-text, 23%);
+			display : -webkit-box;
+			font-size : 12px;
+			font-weight : normal;
+			line-height : 1.38;
+			overflow : hidden;
+			-webkit-box-orient : vertical;
+			-webkit-line-clamp : 2;
 		}
 
 		.feed a {
@@ -356,10 +486,10 @@ body.ttrss_main {
 		}
 
 		div.title a {
-			font-weight : 600;
+			font-weight : 650;
 			text-rendering: optimizelegibility;
 			font-family : @fonts-ui;
-			color : #555;
+			color : #2b2b2b;
 		}
 
 		a.title.high, span.hl-content.high .preview {
@@ -371,7 +501,18 @@ body.ttrss_main {
 		}
 
 		&.Unread {
-			background : white;
+			background : @default-bg;
+
+			&::before {
+				background : @color-accent;
+				border-radius : 50%;
+				content : "";
+				height : 7px;
+				left : 6px;
+				position : absolute;
+				top : 22px;
+				width : 7px;
+			}
 		}
 
 		&.Unread .title a {
@@ -384,20 +525,24 @@ body.ttrss_main {
 		}
 
 		&.active {
-			background : @color-accent ! important;
+			background : #eef5f8 ! important;
 		}
 
 		&.active,
 		&.Selected {
-			color : white;
-			background : desaturate(@color-accent, 25%);
+			color : @default-text;
+			background : #eef5f8;
 
 			a,
 			.feed a,
 			.hl-content a.title,
 			span {
-				color : white;
+				color : inherit;
 			}
+		}
+
+		&:hover {
+			background : #f3f6f7;
 		}
 	}
 
@@ -1073,6 +1218,7 @@ body.ttrss_main {
 		line-height: 1.5;
 		overflow : auto;
 		-webkit-overflow-scrolling : touch;
+		background : #fafafa;
 	}
 
 	img.feed-icon, img.icon {
