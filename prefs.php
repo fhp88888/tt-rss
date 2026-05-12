@@ -152,6 +152,9 @@
         <div id="feedsTab" dojoType="dijit.layout.ContentPane"
             href="backend.php?op=Pref_Feeds"
             title="<i class='material-icons'>rss_feed</i>  <?= __('Feeds') ?>"></div>
+        <div id="aiTab" dojoType="dijit.layout.ContentPane"
+            href="backend.php?op=Pref_Prefs&method=index_ai"
+            title="<i class='material-icons'>auto_awesome</i> <?= __('AI') ?>"></div>
         <div id="filtersTab" dojoType="dijit.layout.ContentPane"
             style="padding : 0px"
             href="backend.php?op=Pref_Filters"

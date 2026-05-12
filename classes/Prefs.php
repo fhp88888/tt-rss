@@ -63,6 +63,12 @@ class Prefs {
 	const WIDESCREEN_MODE = "WIDESCREEN_MODE";
 	const CDM_ENABLE_GRID = "CDM_ENABLE_GRID";
 	const DIGEST_MIN_SCORE = "DIGEST_MIN_SCORE";
+	const AI_SUMMARIES_ENABLED = "AI_SUMMARIES_ENABLED";
+	const AI_ENDPOINT = "AI_ENDPOINT";
+	const AI_MODEL = "AI_MODEL";
+	const AI_API_KEY = "AI_API_KEY";
+	const AI_SUMMARY_MAX_CHARS = "AI_SUMMARY_MAX_CHARS";
+	const AI_SUMMARY_MAX_PER_FEED_UPDATE = "AI_SUMMARY_MAX_PER_FEED_UPDATE";
 
 	private const _DEFAULTS = [
 		Prefs::PURGE_OLD_DAYS => [ 60, Config::T_INT ],
@@ -126,6 +132,12 @@ class Prefs {
 		Prefs::WIDESCREEN_MODE => [ false, Config::T_BOOL ],
 		Prefs::CDM_ENABLE_GRID => [ false, Config::T_BOOL ],
 		Prefs::DIGEST_MIN_SCORE => [ 0, Config::T_INT ],
+		Prefs::AI_SUMMARIES_ENABLED => [ false, Config::T_BOOL ],
+		Prefs::AI_ENDPOINT => [ "https://api.openai.com/v1/chat/completions", Config::T_STRING ],
+		Prefs::AI_MODEL => [ "gpt-4o-mini", Config::T_STRING ],
+		Prefs::AI_API_KEY => [ "", Config::T_STRING ],
+		Prefs::AI_SUMMARY_MAX_CHARS => [ 180, Config::T_INT ],
+		Prefs::AI_SUMMARY_MAX_PER_FEED_UPDATE => [ 5, Config::T_INT ],
 	];
 
 	const _PROFILE_BLACKLIST = [
@@ -143,6 +155,12 @@ class Prefs {
 		Prefs::SSL_CERT_SERIAL,
 		Prefs::DIGEST_PREFERRED_TIME,
 		Prefs::DIGEST_MIN_SCORE,
+		Prefs::AI_SUMMARIES_ENABLED,
+		Prefs::AI_ENDPOINT,
+		Prefs::AI_MODEL,
+		Prefs::AI_API_KEY,
+		Prefs::AI_SUMMARY_MAX_CHARS,
+		Prefs::AI_SUMMARY_MAX_PER_FEED_UPDATE,
 		Prefs::_PREFS_MIGRATED
 	];
 

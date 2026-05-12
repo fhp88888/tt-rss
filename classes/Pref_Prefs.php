@@ -26,7 +26,7 @@ class Pref_Prefs extends Handler_Protected {
 	private const PLUGIN_UPDATE_ALLOWED_BRANCHES = ['main', 'master'];
 
 	function csrf_ignore(string $method) : bool {
-		return in_array($method, ['index', 'updateself', 'otpqrcode']);
+		return in_array($method, ['index', 'index_ai', 'updateself', 'otpqrcode']);
 	}
 
 	function __construct($args) {
@@ -221,11 +221,80 @@ class Pref_Prefs extends Handler_Protected {
 			}
 
 			if (Prefs::is_valid($pref_name)) {
-				Prefs::set($pref_name, $value, $_SESSION['uid'], $profile);
+				$pref_profile = in_array($pref_name, Prefs::_PROFILE_BLACKLIST) ? null : $profile;
+				Prefs::set($pref_name, $value, $_SESSION['uid'], $pref_profile);
 			}
 		}
 
 		print ($need_reload ? 'PREFS_NEED_RELOAD' : __('The configuration was saved.'));
+	}
+
+	function index_ai(): void {
+		$owner_uid = (int) $_SESSION["uid"];
+		$enabled = (bool) Prefs::get(Prefs::AI_SUMMARIES_ENABLED, $owner_uid);
+		$endpoint = (string) Prefs::get(Prefs::AI_ENDPOINT, $owner_uid);
+		$model = (string) Prefs::get(Prefs::AI_MODEL, $owner_uid);
+		$api_key = (string) Prefs::get(Prefs::AI_API_KEY, $owner_uid);
+		$max_chars = (string) Prefs::get(Prefs::AI_SUMMARY_MAX_CHARS, $owner_uid);
+		$max_per_update = (string) Prefs::get(Prefs::AI_SUMMARY_MAX_PER_FEED_UPDATE, $owner_uid);
+		?>
+		<form dojoType='dijit.form.Form' id='aiSettingsForm'>
+			<?= \Controls\hidden_tag("op", "Pref_Prefs") ?>
+			<?= \Controls\hidden_tag("method", "saveconfig") ?>
+			<?= \Controls\hidden_tag("boolean_prefs", Prefs::AI_SUMMARIES_ENABLED) ?>
+
+			<script type="dojo/method" event="onSubmit" args="evt">
+				if (evt) evt.preventDefault();
+				if (this.validate()) {
+					xhr.post("backend.php", this.getValues(), (reply) => {
+						Notify.info(reply);
+					})
+				}
+			</script>
+
+			<div dojoType="dijit.layout.BorderContainer" gutters="false">
+				<div dojoType="dijit.layout.ContentPane" region="center" style="overflow-y : auto">
+					<h2><?= __("AI") ?></h2>
+
+					<fieldset class='prefs'>
+						<label for='CB_<?= Prefs::AI_SUMMARIES_ENABLED ?>'><?= __("Enable AI summaries") ?>:</label>
+						<?= \Controls\checkbox_tag(Prefs::AI_SUMMARIES_ENABLED, $enabled, "true", [], "CB_" . Prefs::AI_SUMMARIES_ENABLED) ?>
+					</fieldset>
+
+					<fieldset class='prefs'>
+						<label><?= __("Endpoint") ?>:</label>
+						<?= \Controls\input_tag(Prefs::AI_ENDPOINT, $endpoint, "text", ["required" => true]) ?>
+					</fieldset>
+
+					<fieldset class='prefs'>
+						<label><?= __("Model") ?>:</label>
+						<?= \Controls\input_tag(Prefs::AI_MODEL, $model, "text", ["required" => true]) ?>
+					</fieldset>
+
+					<fieldset class='prefs'>
+						<label><?= __("API key") ?>:</label>
+						<?= \Controls\input_tag(Prefs::AI_API_KEY, $api_key, "password", ["autocomplete" => "off"]) ?>
+					</fieldset>
+
+					<fieldset class='prefs'>
+						<label><?= __("Maximum summary length") ?>:</label>
+						<?= \Controls\number_spinner_tag(Prefs::AI_SUMMARY_MAX_CHARS, $max_chars, ["required" => true, "smallDelta" => 10, "constraints" => "{min:1,places:0}"]) ?>
+					</fieldset>
+
+					<fieldset class='prefs'>
+						<label><?= __("Maximum summaries per feed update") ?>:</label>
+						<?= \Controls\number_spinner_tag(Prefs::AI_SUMMARY_MAX_PER_FEED_UPDATE, $max_per_update, ["required" => true, "smallDelta" => 1, "constraints" => "{min:0,places:0}"]) ?>
+					</fieldset>
+				</div>
+				<div dojoType="dijit.layout.ContentPane" region="bottom">
+					<button dojoType="dijit.form.Button" type="submit" class="alt-primary">
+						<?= \Controls\icon("save") ?>
+						<?= __("Save configuration") ?>
+					</button>
+				</div>
+			</div>
+		</form>
+		<?php
 	}
 
 	function changePersonalData(): void {

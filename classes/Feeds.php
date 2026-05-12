@@ -207,8 +207,13 @@ class Feeds extends Handler_Protected {
 
 				if (!Prefs::get(Prefs::SHOW_CONTENT_PREVIEW, $_SESSION['uid'], $profile)) {
 					$line["content_preview"] = "";
+					$line["content_preview_is_ai"] = false;
+				} else if (!empty($line["ai_summary"]) && $line["ai_summary_content_hash"] === $line["content_hash"]) {
+					$line["content_preview"] = "&mdash; " . Sanitizer::sanitize($line["ai_summary"]);
+					$line["content_preview_is_ai"] = true;
 				} else {
 					$line["content_preview"] =  "&mdash; " . truncate_string(strip_tags($line["content"]), 250);
+					$line["content_preview_is_ai"] = false;
 
 					$max_excerpt_length = 250;
 
@@ -1594,7 +1599,7 @@ class Feeds extends Handler_Protected {
 			}
 		}
 
-		$content_query_part = "content, ";
+		$content_query_part = "content, content_hash, ai_summary, ai_summary_content_hash, ai_summary_generated_at, ";
 
 		$offset_query_part = $limit_query_part ? ('OFFSET ' . (int) $offset) : '';
 
@@ -2404,4 +2409,3 @@ class Feeds extends Handler_Protected {
 	}
 
 }
-

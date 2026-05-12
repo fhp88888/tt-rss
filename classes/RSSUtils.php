@@ -697,6 +697,9 @@ class RSSUtils {
 			Debug::log("processing articles...", Debug::LOG_VERBOSE);
 
 			$tstart = time();
+			$ai_summary = new AISummary();
+			$ai_summary_generated = 0;
+			$ai_summary_limit = max(0, (int) Prefs::get(Prefs::AI_SUMMARY_MAX_PER_FEED_UPDATE, $feed_obj->owner_uid));
 
 			foreach ($items as $item) {
 				Debug::log(Debug::SEPARATOR, Debug::LOG_VERBOSE);
@@ -844,6 +847,12 @@ class RSSUtils {
 						->find_one($base_entry_id)
 						->set('date_updated', Db::NOW())
 						->save();
+
+					if ($ai_summary_generated < $ai_summary_limit &&
+							$ai_summary->generate_for_entry((int) $base_entry_id, $feed_obj->owner_uid,
+								$entry_title, $entry_content, $entry_current_hash)) {
+						++$ai_summary_generated;
+					}
 
 					continue;
 				}
@@ -1158,6 +1167,12 @@ class RSSUtils {
 							':ts_lang' => $feed_language,
 							':ts_content' => mb_substr(strip_tags($entry_title) . ' ' . \Soundasleep\Html2Text::convert($entry_content), 0, 900000),
 						]);
+					}
+
+					if ($ai_summary_generated < $ai_summary_limit &&
+							$ai_summary->generate_for_entry((int) $entry_ref_id, $feed_obj->owner_uid,
+								$entry_title, $entry_content, $entry_current_hash)) {
+						++$ai_summary_generated;
 					}
 
 					// update aux data
