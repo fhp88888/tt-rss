@@ -299,7 +299,7 @@ class Config {
 		Config::CHECK_FOR_PLUGIN_UPDATES => [ "true",				Config::T_BOOL ],
 		Config::ENABLE_PLUGIN_INSTALLER => [ "true",					Config::T_BOOL ],
 		Config::AUTH_MIN_INTERVAL => [ 5,								Config::T_INT ],
-		Config::HTTP_USER_AGENT => [ 'Tiny Tiny RSS/%s (https://github.com/tt-rss/tt-rss)',
+		Config::HTTP_USER_AGENT => [ 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Folo',
 																					Config::T_STRING ],
 		Config::HTTP_429_THROTTLE_INTERVAL => [ 3600,				Config::T_INT ],
 		Config::DISABLE_LOGIN_FORM => [ "",								Config::T_BOOL ],

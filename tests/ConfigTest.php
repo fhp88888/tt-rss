@@ -146,4 +146,11 @@ final class ConfigTest extends TestCase {
 			Config::get_self_dir()
 		);
 	}
+
+	public function test_get_user_agent_uses_folo_identity(): void {
+		$this->assertEquals(
+			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Folo',
+			Config::get_user_agent()
+		);
+	}
 }
