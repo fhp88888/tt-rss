@@ -49,6 +49,30 @@ class AISummary {
 		];
 	}
 
+	static function process_backlog(int $owner_uid, ?AISummary $ai_summary = null): int {
+		$concurrency = max(0, (int) Prefs::get(Prefs::AI_SUMMARY_CONCURRENCY, $owner_uid));
+
+		if ($concurrency <= 0 || !self::is_configured($owner_uid)) return 0;
+
+		$sth = Db::pdo()->prepare("SELECT e.id AS entry_id,
+				e.title,
+				e.content,
+				e.content_hash
+			FROM ttrss_entries e
+			JOIN ttrss_user_entries ue ON ue.ref_id = e.id
+			WHERE ue.owner_uid = ?
+				AND (
+					e.ai_summary IS NULL
+					OR e.ai_summary = ''
+					OR e.ai_summary_content_hash <> e.content_hash
+				)
+			ORDER BY e.date_entered DESC");
+
+		$sth->execute([$owner_uid]);
+
+		return ($ai_summary ?? new self())->generate_for_entries($sth->fetchAll(PDO::FETCH_ASSOC), $owner_uid, $concurrency);
+	}
+
 	static function build_prompt(string $title, string $content, int $max_chars): string {
 		$text = \Soundasleep\Html2Text::convert($content);
 		$text = preg_replace('/\s+/u', ' ', strip_tags($text)) ?? "";

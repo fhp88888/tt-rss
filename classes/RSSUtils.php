@@ -697,9 +697,6 @@ class RSSUtils {
 			Debug::log("processing articles...", Debug::LOG_VERBOSE);
 
 			$tstart = time();
-			$ai_summary = new AISummary();
-			$ai_summary_tasks = [];
-			$ai_summary_concurrency = max(0, (int) Prefs::get(Prefs::AI_SUMMARY_CONCURRENCY, $feed_obj->owner_uid));
 
 			foreach ($items as $item) {
 				Debug::log(Debug::SEPARATOR, Debug::LOG_VERBOSE);
@@ -847,13 +844,6 @@ class RSSUtils {
 						->find_one($base_entry_id)
 						->set('date_updated', Db::NOW())
 						->save();
-
-					$ai_summary_tasks[] = [
-						"entry_id" => (int) $base_entry_id,
-						"title" => $entry_title,
-						"content" => $entry_content,
-						"content_hash" => $entry_current_hash,
-					];
 
 					continue;
 				}
@@ -1170,13 +1160,6 @@ class RSSUtils {
 						]);
 					}
 
-					$ai_summary_tasks[] = [
-						"entry_id" => (int) $entry_ref_id,
-						"title" => $entry_title,
-						"content" => $entry_content,
-						"content_hash" => $entry_current_hash,
-					];
-
 					// update aux data
 					$sth = $pdo->prepare("UPDATE ttrss_user_entries
 							SET score = ? WHERE ref_id = ?");
@@ -1290,11 +1273,6 @@ class RSSUtils {
 
 				Debug::log("article processed.", Debug::LOG_VERBOSE);
 			}
-
-			$generated_ai_summaries = $ai_summary->generate_for_entries($ai_summary_tasks,
-				$feed_obj->owner_uid, $ai_summary_concurrency);
-
-			Debug::log("AI summaries generated: $generated_ai_summaries", Debug::LOG_VERBOSE);
 
 			Debug::log(Debug::SEPARATOR, Debug::LOG_VERBOSE);
 
@@ -1757,6 +1735,25 @@ class RSSUtils {
 		$scheduler->add_scheduled_task('send_headlines_digests', Config::get(Config::SCHEDULE_SEND_HEADLINES_DIGESTS),
 			function() {
 				Digest::send_headlines_digests();
+
+				return 0;
+			}
+		);
+
+		$scheduler->add_scheduled_task('ai_summary_backlog', '* * * * *',
+			function() {
+				$users = ORM::for_table('ttrss_users')
+					->select('id')
+					->where_not_in('access_level', [UserHelper::ACCESS_LEVEL_DISABLED, UserHelper::ACCESS_LEVEL_READONLY])
+					->find_many();
+
+				foreach ($users as $user) {
+					$generated = AISummary::process_backlog((int) $user->id);
+
+					if ($generated > 0) {
+						Debug::log("AI summary backlog generated $generated summaries for user {$user->id}.");
+					}
+				}
 
 				return 0;
 			}
