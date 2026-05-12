@@ -85,10 +85,10 @@ class AISummary {
 		$title = trim(strip_tags($title));
 		$max_chars = max(40, min(500, $max_chars));
 
-		return "Summarize this RSS article in the same language as the article. " .
-			"Return plain text only, no Markdown, no bullet list, no preamble. " .
-			"Keep it under {$max_chars} characters.\n\n" .
-			"Title: {$title}\n\nArticle:\n{$text}";
+		return "请用中文总结以下 RSS 文章。" .
+			"只返回纯文本，不要 Markdown、项目符号或开场白。" .
+			"摘要必须使用中文，并控制在 {$max_chars} 个字符以内。\n\n" .
+			"标题：{$title}\n\n文章：\n{$text}";
 	}
 
 	function generate_for_entry(int $entry_id, int $owner_uid, string $title, string $content, string $content_hash): bool {
