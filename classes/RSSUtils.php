@@ -698,8 +698,8 @@ class RSSUtils {
 
 			$tstart = time();
 			$ai_summary = new AISummary();
-			$ai_summary_generated = 0;
-			$ai_summary_limit = max(0, (int) Prefs::get(Prefs::AI_SUMMARY_MAX_PER_FEED_UPDATE, $feed_obj->owner_uid));
+			$ai_summary_tasks = [];
+			$ai_summary_concurrency = max(0, (int) Prefs::get(Prefs::AI_SUMMARY_CONCURRENCY, $feed_obj->owner_uid));
 
 			foreach ($items as $item) {
 				Debug::log(Debug::SEPARATOR, Debug::LOG_VERBOSE);
@@ -848,11 +848,12 @@ class RSSUtils {
 						->set('date_updated', Db::NOW())
 						->save();
 
-					if ($ai_summary_generated < $ai_summary_limit &&
-							$ai_summary->generate_for_entry((int) $base_entry_id, $feed_obj->owner_uid,
-								$entry_title, $entry_content, $entry_current_hash)) {
-						++$ai_summary_generated;
-					}
+					$ai_summary_tasks[] = [
+						"entry_id" => (int) $base_entry_id,
+						"title" => $entry_title,
+						"content" => $entry_content,
+						"content_hash" => $entry_current_hash,
+					];
 
 					continue;
 				}
@@ -1169,11 +1170,12 @@ class RSSUtils {
 						]);
 					}
 
-					if ($ai_summary_generated < $ai_summary_limit &&
-							$ai_summary->generate_for_entry((int) $entry_ref_id, $feed_obj->owner_uid,
-								$entry_title, $entry_content, $entry_current_hash)) {
-						++$ai_summary_generated;
-					}
+					$ai_summary_tasks[] = [
+						"entry_id" => (int) $entry_ref_id,
+						"title" => $entry_title,
+						"content" => $entry_content,
+						"content_hash" => $entry_current_hash,
+					];
 
 					// update aux data
 					$sth = $pdo->prepare("UPDATE ttrss_user_entries
@@ -1288,6 +1290,11 @@ class RSSUtils {
 
 				Debug::log("article processed.", Debug::LOG_VERBOSE);
 			}
+
+			$generated_ai_summaries = $ai_summary->generate_for_entries($ai_summary_tasks,
+				$feed_obj->owner_uid, $ai_summary_concurrency);
+
+			Debug::log("AI summaries generated: $generated_ai_summaries", Debug::LOG_VERBOSE);
 
 			Debug::log(Debug::SEPARATOR, Debug::LOG_VERBOSE);
 

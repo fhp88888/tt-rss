@@ -236,7 +236,7 @@ class Pref_Prefs extends Handler_Protected {
 		$model = (string) Prefs::get(Prefs::AI_MODEL, $owner_uid);
 		$api_key = (string) Prefs::get(Prefs::AI_API_KEY, $owner_uid);
 		$max_chars = (string) Prefs::get(Prefs::AI_SUMMARY_MAX_CHARS, $owner_uid);
-		$max_per_update = (string) Prefs::get(Prefs::AI_SUMMARY_MAX_PER_FEED_UPDATE, $owner_uid);
+		$concurrency = (string) Prefs::get(Prefs::AI_SUMMARY_CONCURRENCY, $owner_uid);
 		?>
 		<form dojoType='dijit.form.Form' id='aiSettingsForm'>
 			<?= \Controls\hidden_tag("op", "Pref_Prefs") ?>
@@ -282,8 +282,8 @@ class Pref_Prefs extends Handler_Protected {
 					</fieldset>
 
 					<fieldset class='prefs'>
-						<label><?= __("Maximum summaries per feed update") ?>:</label>
-						<?= \Controls\number_spinner_tag(Prefs::AI_SUMMARY_MAX_PER_FEED_UPDATE, $max_per_update, ["required" => true, "smallDelta" => 1, "constraints" => "{min:0,places:0}"]) ?>
+						<label><?= __("Maximum concurrent AI requests") ?>:</label>
+						<?= \Controls\number_spinner_tag(Prefs::AI_SUMMARY_CONCURRENCY, $concurrency, ["required" => true, "smallDelta" => 1, "constraints" => "{min:0,places:0}"]) ?>
 					</fieldset>
 				</div>
 				<div dojoType="dijit.layout.ContentPane" region="bottom">

@@ -68,7 +68,7 @@ class Prefs {
 	const AI_MODEL = "AI_MODEL";
 	const AI_API_KEY = "AI_API_KEY";
 	const AI_SUMMARY_MAX_CHARS = "AI_SUMMARY_MAX_CHARS";
-	const AI_SUMMARY_MAX_PER_FEED_UPDATE = "AI_SUMMARY_MAX_PER_FEED_UPDATE";
+	const AI_SUMMARY_CONCURRENCY = "AI_SUMMARY_CONCURRENCY";
 
 	private const _DEFAULTS = [
 		Prefs::PURGE_OLD_DAYS => [ 60, Config::T_INT ],
@@ -137,7 +137,7 @@ class Prefs {
 		Prefs::AI_MODEL => [ "gpt-4o-mini", Config::T_STRING ],
 		Prefs::AI_API_KEY => [ "", Config::T_STRING ],
 		Prefs::AI_SUMMARY_MAX_CHARS => [ 180, Config::T_INT ],
-		Prefs::AI_SUMMARY_MAX_PER_FEED_UPDATE => [ 5, Config::T_INT ],
+		Prefs::AI_SUMMARY_CONCURRENCY => [ 2, Config::T_INT ],
 	];
 
 	const _PROFILE_BLACKLIST = [
@@ -160,7 +160,7 @@ class Prefs {
 		Prefs::AI_MODEL,
 		Prefs::AI_API_KEY,
 		Prefs::AI_SUMMARY_MAX_CHARS,
-		Prefs::AI_SUMMARY_MAX_PER_FEED_UPDATE,
+		Prefs::AI_SUMMARY_CONCURRENCY,
 		Prefs::_PREFS_MIGRATED
 	];
 

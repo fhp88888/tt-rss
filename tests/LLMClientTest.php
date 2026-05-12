@@ -128,4 +128,18 @@ final class LLMClientTest extends TestCase {
 		$this->assertSame(17, $options['connect_timeout']);
 		$this->assertSame(17, $options['timeout']);
 	}
+
+	public function test_summarize_async_returns_trimmed_choice_content(): void {
+		$history = [];
+		$client = $this->build_client([
+			new Response(200, [], '{"choices":[{"message":{"content":" async summary "}}]}'),
+		], $history);
+
+		$llm_client = new LLMClient($client);
+
+		$this->assertSame(
+			'async summary',
+			$llm_client->summarize_async('https://example.test/chat', 'gpt-test', 'secret-key', 'Prompt')->wait()
+		);
+	}
 }
