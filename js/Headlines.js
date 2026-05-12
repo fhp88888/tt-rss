@@ -577,6 +577,22 @@ const Headlines = {
 			}
 		}
 	},
+	updateToolbarArticleTitle: function (id) {
+		const elem = document.getElementById("toolbar-active-title");
+
+		if (!elem) return;
+
+		const row = id ? document.getElementById(`RROW-${id}`) : null;
+		const title = row?.getAttribute("data-article-title") || "";
+		const max_length = 48;
+		const chars = Array.from(title.trim());
+
+		elem.innerText = chars.length > max_length ?
+			`${chars.slice(0, max_length).join("")}...` : title;
+
+		elem.setAttribute("title", title);
+		elem.classList.toggle("visible", !!title);
+	},
 	renderToolbar: function(headlines) {
 
 		const tb = headlines['toolbar'];
@@ -601,6 +617,7 @@ const Headlines = {
 					${tb.error ? `<i title="${App.escapeHtml(tb.error)}" class='material-icons icon-error'>error</i>` : ''}
 					<span id='feed_current_unread' style='display: none'></span>
 				</span>
+				<span id='toolbar-active-title' class='toolbar-active-title'></span>
 				<span class='right'>
 					${tb.plugin_buttons}
 				</span>
@@ -610,6 +627,7 @@ const Headlines = {
 		}
 
 		dojo.parser.parse(target.domNode);
+		Headlines.updateToolbarArticleTitle(Article.getActive());
 	},
 	onLoaded: function (reply, offset, append) {
 		let is_cat = false;

@@ -1133,6 +1133,7 @@ body.ttrss_main {
 			color : @default-text;
 			font-size : @font-size-toolbar;
 			align-items : center;
+			position : relative;
 
 			.dijitSelect,
 			.dijitDropDownButton .dijitButtonNode,
@@ -1179,6 +1180,29 @@ body.ttrss_main {
 				.right {
 					display : flex;
 					align-items : center;
+				}
+
+				.toolbar-active-title {
+					color : @default-text;
+					display : none;
+					font-size : @font-size-toolbar;
+					font-weight : 600;
+					left : 50%;
+					line-height : 32px;
+					max-width : 42vw;
+					overflow : hidden;
+					pointer-events : none;
+					position : absolute;
+					text-align : center;
+					text-overflow : ellipsis;
+					top : 0;
+					transform : translateX(-50%);
+					white-space : nowrap;
+					z-index : 1;
+
+					&.visible {
+						display : block;
+					}
 				}
 			}
 

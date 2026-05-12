@@ -417,8 +417,11 @@ const Article = {
 
 				row.classList.remove('Unread');
 				row.classList.add('active');
+				Headlines.updateToolbarArticleTitle(id);
 
 				PluginHost.run(PluginHost.HOOK_ARTICLE_SET_ACTIVE, parseInt(row.getAttribute('data-article-id')));
+			} else if (!id) {
+				Headlines.updateToolbarArticleTitle(0);
 			}
 		}
 	},
