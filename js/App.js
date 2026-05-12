@@ -904,7 +904,7 @@ const App = {
 			});
 	},
    updateTitle: function() {
-      let tmp = "Tiny Tiny RSS";
+      let tmp = "Genver RSS";
 
       if (this.global_unread > 0) {
          tmp = "(" + this.global_unread + ") " + tmp;
@@ -1368,4 +1368,3 @@ const App = {
       }
    },
 }
-

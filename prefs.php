@@ -13,7 +13,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Tiny Tiny RSS : <?= __("Preferences") ?></title>
+	<title>Genver RSS : <?= __("Preferences") ?></title>
     <meta name="viewport" content="initial-scale=1,width=device-width" />
 
 	<?php if ($_SESSION["uid"] && empty($_SESSION["safe_mode"])) {

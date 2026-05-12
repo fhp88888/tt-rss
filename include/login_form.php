@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Tiny Tiny RSS : Login</title>
+	<title>Genver RSS : Login</title>
 	<link rel="shortcut icon" type="image/png" href="images/favicon.png">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<?php
