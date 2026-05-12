@@ -1,0 +1,62 @@
+#
+# Local development preview without building Docker images.
+#
+# Source code is edited on the host and bind-mounted into the app containers.
+# PostgreSQL data is kept in a named Docker volume.
+#
+
+x-ttrss-env: &ttrss-env
+  TTRSS_DB_HOST: db
+  TTRSS_DB_PORT: 5432
+  TTRSS_DB_USER: postgres
+  TTRSS_DB_NAME: postgres
+  TTRSS_DB_PASS: password
+  TTRSS_SELF_URL_PATH: http://127.0.0.1:8280/tt-rss
+  ADMIN_USER_PASS: password
+  ADMIN_USER_ACCESS_LEVEL: 10
+  SKIP_RSYNC_ON_STARTUP: true
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    volumes:
+      - ttrss-dev-db:/var/lib/postgresql/data
+
+  app:
+    image: ghcr.io/tt-rss/tt-rss:latest
+    restart: unless-stopped
+    environment:
+      <<: *ttrss-env
+    volumes:
+      - .:/var/www/html/tt-rss
+    depends_on:
+      - db
+
+  updater:
+    image: ghcr.io/tt-rss/tt-rss:latest
+    restart: unless-stopped
+    environment:
+      <<: *ttrss-env
+    volumes:
+      - .:/var/www/html/tt-rss
+    depends_on:
+      - app
+    command: /opt/tt-rss/updater.sh
+
+  web-nginx:
+    image: ghcr.io/tt-rss/tt-rss-web-nginx:latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:8280:80
+    volumes:
+      - .:/var/www/html/tt-rss:ro
+    depends_on:
+      - app
+
+volumes:
+  ttrss-dev-db:
