@@ -144,6 +144,17 @@ const Article = {
 				${App.FormFields.icon('note')} <div onclick class='body'>${note ? App.escapeHtml(note) : ""}</div>
 			</div>`;
 	},
+	renderAISummary: function (summary) {
+		if (!summary) return "";
+
+		return `<div class="article-ai-summary">
+			<div class="article-ai-summary-header">
+				<i class="material-icons">auto_awesome</i>
+				<span>AI Summary</span>
+			</div>
+			<div class="article-ai-summary-content">${summary}</div>
+		</div>`;
+	},
 	renderTags: function (id, tags) {
 		return `<span class="tags" title="${tags.join(", ")}" data-tags-for="${id}">
 			${tags.length > 0 ? tags.map((tag) => `
@@ -319,6 +330,7 @@ const Article = {
 							<div class="buttons right">${hl.buttons}</div>
 						</div>
 					</div>
+					${Article.renderAISummary(hl.ai_summary)}
 					${Article.renderNote(hl.id, hl.note)}
 					<div class="content" lang="${hl.lang ? App.escapeHtml(hl.lang) : 'en'}">
 						${hl.content}

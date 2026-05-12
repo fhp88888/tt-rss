@@ -224,6 +224,12 @@ class Feeds extends Handler_Protected {
 						$line, $max_excerpt_length);
 				}
 
+				if (!empty($line["ai_summary"]) && $line["ai_summary_content_hash"] === $line["content_hash"]) {
+					$line["ai_summary"] = Sanitizer::sanitize($line["ai_summary"]);
+				} else {
+					$line["ai_summary"] = "";
+				}
+
 				$id = $line["id"];
 
 				// normalize archived feed
