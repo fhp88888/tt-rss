@@ -237,6 +237,7 @@ class Pref_Prefs extends Handler_Protected {
 		$api_key = (string) Prefs::get(Prefs::AI_API_KEY, $owner_uid);
 		$max_chars = (string) Prefs::get(Prefs::AI_SUMMARY_MAX_CHARS, $owner_uid);
 		$concurrency = (string) Prefs::get(Prefs::AI_SUMMARY_CONCURRENCY, $owner_uid);
+		$status = AISummary::get_status($owner_uid);
 		?>
 		<form dojoType='dijit.form.Form' id='aiSettingsForm'>
 			<?= \Controls\hidden_tag("op", "Pref_Prefs") ?>
@@ -259,6 +260,30 @@ class Pref_Prefs extends Handler_Protected {
 					<fieldset class='prefs'>
 						<label for='CB_<?= Prefs::AI_SUMMARIES_ENABLED ?>'><?= __("Enable AI summaries") ?>:</label>
 						<?= \Controls\checkbox_tag(Prefs::AI_SUMMARIES_ENABLED, $enabled, "true", [], "CB_" . Prefs::AI_SUMMARIES_ENABLED) ?>
+					</fieldset>
+
+					<fieldset class='prefs'>
+						<label><?= __("Summary status") ?>:</label>
+						<table>
+							<tbody>
+								<tr>
+									<th><?= __("Total articles") ?></th>
+									<td><?= htmlspecialchars((string)(int)($status["total_articles"] ?? 0)) ?></td>
+								</tr>
+								<tr>
+									<th><?= __("Processed") ?></th>
+									<td><?= htmlspecialchars((string)(int)($status["processed_articles"] ?? 0)) ?></td>
+								</tr>
+								<tr>
+									<th><?= __("Unprocessed") ?></th>
+									<td><?= htmlspecialchars((string)(int)($status["unprocessed_articles"] ?? 0)) ?></td>
+								</tr>
+								<tr>
+									<th><?= __("Queued") ?></th>
+									<td><?= htmlspecialchars((string)(int)($status["queued_articles"] ?? 0)) ?></td>
+								</tr>
+							</tbody>
+						</table>
 					</fieldset>
 
 					<fieldset class='prefs'>

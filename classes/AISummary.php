@@ -19,6 +19,36 @@ class AISummary {
 			trim((string) Prefs::get(Prefs::AI_API_KEY, $owner_uid)) !== "";
 	}
 
+	/**
+	 * @return array{total_articles:int,processed_articles:int,unprocessed_articles:int,queued_articles:int}
+	 */
+	static function get_status(int $owner_uid): array {
+		$sth = Db::pdo()->prepare("SELECT
+				COUNT(*) AS total_articles,
+				COUNT(*) FILTER (
+					WHERE e.ai_summary IS NOT NULL
+						AND e.ai_summary <> ''
+						AND e.ai_summary_content_hash = e.content_hash
+				) AS processed_articles
+			FROM ttrss_entries e
+			JOIN ttrss_user_entries ue ON ue.ref_id = e.id
+			WHERE ue.owner_uid = ?");
+
+		$sth->execute([$owner_uid]);
+
+		$row = $sth->fetch(PDO::FETCH_ASSOC) ?: [];
+		$total = (int) ($row["total_articles"] ?? 0);
+		$processed = (int) ($row["processed_articles"] ?? 0);
+		$unprocessed = max(0, $total - $processed);
+
+		return [
+			"total_articles" => $total,
+			"processed_articles" => $processed,
+			"unprocessed_articles" => $unprocessed,
+			"queued_articles" => $unprocessed,
+		];
+	}
+
 	static function build_prompt(string $title, string $content, int $max_chars): string {
 		$text = \Soundasleep\Html2Text::convert($content);
 		$text = preg_replace('/\s+/u', ' ', strip_tags($text)) ?? "";
