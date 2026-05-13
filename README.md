@@ -49,6 +49,13 @@ The deploy stack uses prebuilt tt-rss runtime images and bind-mounts this Git
 checkout into the containers. Docker provides PHP-FPM, nginx, PostgreSQL, and
 the updater process; application code stays in Git on the host.
 
+Runtime data is kept under `data/`:
+
+* `data/postgres` stores PostgreSQL data.
+* `data/cache` and `data/lock` store tt-rss runtime files.
+* `data/plugins.local`, `data/templates.local`, and `data/themes.local` store
+  local customizations.
+
 First deployment:
 
 ```bash

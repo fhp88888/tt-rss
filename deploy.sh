@@ -18,6 +18,7 @@ Commands:
 
 Environment:
   COMPOSE_FILE  Compose file to use, defaults to docker-compose.yml
+  TTRSS_ENV_FILE  Env file loaded into containers, defaults to .env
 EOF
 }
 

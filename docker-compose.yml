@@ -11,14 +11,13 @@ services:
     image: postgres:15-alpine
     restart: unless-stopped
     env_file:
-      - path: .env
-        required: false
+      - ${TTRSS_ENV_FILE:-.env}
     environment:
       - POSTGRES_USER=${TTRSS_DB_USER:-postgres}
       - POSTGRES_PASSWORD=${TTRSS_DB_PASS:-password}
       - POSTGRES_DB=${TTRSS_DB_NAME:-postgres}
     volumes:
-      - ttrss-db:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql/data
 
   app:
     image: ghcr.io/tt-rss/tt-rss:latest
@@ -29,10 +28,14 @@ services:
       TTRSS_DB_NAME: ${TTRSS_DB_NAME:-postgres}
       TTRSS_DB_PASS: ${TTRSS_DB_PASS:-password}
     env_file:
-      - path: .env
-        required: false
+      - ${TTRSS_ENV_FILE:-.env}
     volumes:
       - .:/var/www/html/tt-rss
+      - ./data/cache:/var/www/html/tt-rss/cache
+      - ./data/lock:/var/www/html/tt-rss/lock
+      - ./data/plugins.local:/var/www/html/tt-rss/plugins.local
+      - ./data/templates.local:/var/www/html/tt-rss/templates.local
+      - ./data/themes.local:/var/www/html/tt-rss/themes.local
     depends_on:
       - db
 
@@ -45,10 +48,14 @@ services:
       TTRSS_DB_NAME: ${TTRSS_DB_NAME:-postgres}
       TTRSS_DB_PASS: ${TTRSS_DB_PASS:-password}
     env_file:
-      - path: .env
-        required: false
+      - ${TTRSS_ENV_FILE:-.env}
     volumes:
       - .:/var/www/html/tt-rss
+      - ./data/cache:/var/www/html/tt-rss/cache
+      - ./data/lock:/var/www/html/tt-rss/lock
+      - ./data/plugins.local:/var/www/html/tt-rss/plugins.local
+      - ./data/templates.local:/var/www/html/tt-rss/templates.local
+      - ./data/themes.local:/var/www/html/tt-rss/themes.local
     depends_on:
       - app
     command: /opt/tt-rss/updater.sh
@@ -57,14 +64,14 @@ services:
     image: ghcr.io/tt-rss/tt-rss-web-nginx:latest
     restart: unless-stopped
     env_file:
-      - path: .env
-        required: false
+      - ${TTRSS_ENV_FILE:-.env}
     ports:
       - ${HTTP_PORT:-127.0.0.1:8280}:80
     volumes:
       - .:/var/www/html/tt-rss:ro
+      - ./data/cache:/var/www/html/tt-rss/cache:ro
+      - ./data/plugins.local:/var/www/html/tt-rss/plugins.local:ro
+      - ./data/templates.local:/var/www/html/tt-rss/templates.local:ro
+      - ./data/themes.local:/var/www/html/tt-rss/themes.local:ro
     depends_on:
       - app
-
-volumes:
-  ttrss-db:

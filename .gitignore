@@ -12,6 +12,8 @@ Thumbs.db
 /feed-icons/*
 /cache/*/*
 /lock/*
+/data/*
+!/data/.gitkeep
 /.vscode/settings.json
 /vendor/**/.git
 /.phpunit.cache
