@@ -43,7 +43,8 @@ prepare_data_dirs() {
 		data/themes.local
 
 	run rm -f config.php
-	run chown "$OWNER_UID:$OWNER_GID" .
+	run chgrp "$OWNER_GID" .
+	run chmod g+w .
 
 	run chown -R "$OWNER_UID:$OWNER_GID" \
 		data/cache \

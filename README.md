@@ -57,9 +57,9 @@ Runtime data is kept under `data/`:
   local customizations.
 
 `./deploy.sh` creates the runtime directories and assigns them to `OWNER_UID`
-and `OWNER_GID`, both defaulting to `1000`. It also lets the container generate
-the ignored root-level `config.php` required by the upstream image startup
-script.
+and `OWNER_GID`, both defaulting to `1000`. It also grants the app group write
+access to the checkout root so the container can generate the ignored
+root-level `config.php` required by the upstream image startup script.
 
 The deploy compose hides the host `data/` directory inside app containers so
 the upstream startup script cannot recursively change ownership of PostgreSQL
