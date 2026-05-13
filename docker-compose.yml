@@ -32,7 +32,7 @@ services:
     volumes:
       - .:/var/www/html/tt-rss
       - ttrss-hidden-data:/var/www/html/tt-rss/data
-      - ./data/rss-gallery.csv:/var/www/html/tt-rss/data/rss-gallery.csv:ro
+      - ./data/rss-gallery.csv:/var/www/html/tt-rss/data/rss-gallery.csv
       - ./data/cache:/var/www/html/tt-rss/cache
       - ./data/lock:/var/www/html/tt-rss/lock
       - ./data/plugins.local:/var/www/html/tt-rss/plugins.local
@@ -54,7 +54,7 @@ services:
     volumes:
       - .:/var/www/html/tt-rss
       - ttrss-hidden-data:/var/www/html/tt-rss/data
-      - ./data/rss-gallery.csv:/var/www/html/tt-rss/data/rss-gallery.csv:ro
+      - ./data/rss-gallery.csv:/var/www/html/tt-rss/data/rss-gallery.csv
       - ./data/cache:/var/www/html/tt-rss/cache
       - ./data/lock:/var/www/html/tt-rss/lock
       - ./data/plugins.local:/var/www/html/tt-rss/plugins.local
