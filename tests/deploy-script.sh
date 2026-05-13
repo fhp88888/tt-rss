@@ -24,8 +24,11 @@ assert_contains "$help_output" "down"
 assert_contains "$help_output" "restart"
 assert_contains "$help_output" "update"
 assert_contains "$help_output" "TTRSS_ENV_FILE"
+assert_contains "$help_output" "OWNER_UID"
 
 up_output="$(./deploy.sh --dry-run up)"
+assert_contains "$up_output" "mkdir -p data/cache data/lock data/plugins.local data/templates.local data/themes.local"
+assert_contains "$up_output" "chown -R 1000:1000 data/cache data/lock data/plugins.local data/templates.local data/themes.local"
 assert_contains "$up_output" "docker compose -f docker-compose.yml up -d"
 
 down_output="$(./deploy.sh --dry-run down)"

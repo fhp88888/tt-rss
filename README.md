@@ -56,6 +56,9 @@ Runtime data is kept under `data/`:
 * `data/plugins.local`, `data/templates.local`, and `data/themes.local` store
   local customizations.
 
+`./deploy.sh` creates the runtime directories and assigns them to `OWNER_UID`
+and `OWNER_GID`, both defaulting to `1000`.
+
 First deployment:
 
 ```bash
