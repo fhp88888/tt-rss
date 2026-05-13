@@ -160,8 +160,9 @@ Update deployed application code:
 ./deploy.sh update
 ```
 
-That command prepares runtime directories, runs `git pull --ff-only`, and
-restarts the app, updater, and web services.
+That command prepares runtime directories, runs `git pull --ff-only`, and then
+runs `docker compose up -d` so changed service definitions, volume mounts, and
+environment settings are applied as well as code changes.
 
 PHP, JavaScript, CSS, template, and CSV changes do not require image rebuilds
 because the checkout is bind-mounted from the host.

@@ -15,7 +15,7 @@ Commands:
   up       Start the deploy stack in the background
   down     Stop and remove the deploy stack containers
   restart  Restart application services
-  update   Pull Git changes and restart application services
+  update   Pull Git changes and reconcile the deploy stack
   help     Show this help
 
 Environment:
@@ -79,7 +79,7 @@ case "$command" in
 	update)
 		prepare_data_dirs
 		run git pull --ff-only
-		run docker compose -f "$COMPOSE_FILE" restart "${SERVICES[@]}"
+		run docker compose -f "$COMPOSE_FILE" up -d
 		;;
 	*)
 		echo "Unknown command: $command" >&2

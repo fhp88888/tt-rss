@@ -42,6 +42,6 @@ assert_contains "$restart_output" "docker compose -f docker-compose.yml restart 
 
 update_output="$(./deploy.sh --dry-run update)"
 assert_contains "$update_output" "git pull --ff-only"
-assert_contains "$update_output" "docker compose -f docker-compose.yml restart app updater web-nginx"
+assert_contains "$update_output" "docker compose -f docker-compose.yml up -d"
 
 echo "deploy script tests passed"
