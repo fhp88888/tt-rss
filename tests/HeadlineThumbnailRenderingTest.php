@@ -21,6 +21,6 @@ final class HeadlineThumbnailRenderingTest extends TestCase {
 		$this->assertStringContainsString('.headline-thumbnail', $theme_less);
 		$this->assertStringContainsString('flex : 0 0 80px', $theme_less);
 		$this->assertStringContainsString('height : 80px', $theme_less);
-		$this->assertStringContainsString('object-fit : contain', $theme_less);
+		$this->assertStringContainsString('object-fit : cover', $theme_less);
 	}
 }
