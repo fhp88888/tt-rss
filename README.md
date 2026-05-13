@@ -38,6 +38,42 @@ Please refer to [the installation guide](https://tt-rss.org/docs/Installation-Gu
 
 Contributions (code, translations, reporting issues, etc.) are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
+## Docker deployment in this fork
+
+This checkout keeps two Docker Compose entry points:
+
+* `docker-compose.dev.yml` is the local development preview stack.
+* `docker-compose.yml` is the deploy stack.
+
+The deploy stack uses prebuilt tt-rss runtime images and bind-mounts this Git
+checkout into the containers. Docker provides PHP-FPM, nginx, PostgreSQL, and
+the updater process; application code stays in Git on the host.
+
+First deployment:
+
+```bash
+cp .env-dist .env
+# edit .env, especially TTRSS_SELF_URL_PATH and HTTP_PORT
+docker compose up -d
+```
+
+Update deployed application code:
+
+```bash
+git pull
+docker compose restart app updater web-nginx
+```
+
+Rebuilds are not required for PHP, JavaScript, CSS, or template changes because
+the source tree is mounted from the host. Pull newer runtime images only when
+you want updated image contents or an upstream change requires new runtime
+packages:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
 ## License
 
 This program is free software: you can redistribute it and/or modify

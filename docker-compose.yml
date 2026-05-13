@@ -1,7 +1,9 @@
 #
-# simplified compose FOR LOCAL DEVELOPMENT.
+# Deploy compose.
 #
-# please don't use this in production: it has no database persistence and maps to tt-rss source directly.
+# Docker provides the runtime environment; the tt-rss source tree is bind-mounted
+# from this checkout. Update deployed application code with `git pull` on the
+# host, then restart the app services if PHP processes need to pick up changes.
 #
 
 services:
@@ -9,22 +11,26 @@ services:
     image: postgres:15-alpine
     restart: unless-stopped
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
-      - POSTGRES_USER=${TTRSS_DB_USER}
-      - POSTGRES_PASSWORD=${TTRSS_DB_PASS}
-      - POSTGRES_DB=${TTRSS_DB_NAME}
+      - POSTGRES_USER=${TTRSS_DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${TTRSS_DB_PASS:-password}
+      - POSTGRES_DB=${TTRSS_DB_NAME:-postgres}
+    volumes:
+      - ttrss-db:/var/lib/postgresql/data
 
   app:
     image: ghcr.io/tt-rss/tt-rss:latest
+    restart: unless-stopped
     environment:
       SKIP_RSYNC_ON_STARTUP: true
-    build:
-      dockerfile: .docker/app/Dockerfile
-      context: .
-    restart: unless-stopped
+      TTRSS_DB_USER: ${TTRSS_DB_USER:-postgres}
+      TTRSS_DB_NAME: ${TTRSS_DB_NAME:-postgres}
+      TTRSS_DB_PASS: ${TTRSS_DB_PASS:-password}
     env_file:
-      - .env
+      - path: .env
+        required: false
     volumes:
       - .:/var/www/html/tt-rss
     depends_on:
@@ -32,12 +38,15 @@ services:
 
   updater:
     image: ghcr.io/tt-rss/tt-rss:latest
-    build:
-      dockerfile: .docker/app/Dockerfile
-      context: .
     restart: unless-stopped
+    environment:
+      SKIP_RSYNC_ON_STARTUP: true
+      TTRSS_DB_USER: ${TTRSS_DB_USER:-postgres}
+      TTRSS_DB_NAME: ${TTRSS_DB_NAME:-postgres}
+      TTRSS_DB_PASS: ${TTRSS_DB_PASS:-password}
     env_file:
-      - .env
+      - path: .env
+        required: false
     volumes:
       - .:/var/www/html/tt-rss
     depends_on:
@@ -46,15 +55,16 @@ services:
 
   web-nginx:
     image: ghcr.io/tt-rss/tt-rss-web-nginx:latest
-    build:
-      dockerfile: .docker/web-nginx/Dockerfile
-      context: .
     restart: unless-stopped
     env_file:
-      - .env
+      - path: .env
+        required: false
     ports:
-      - ${HTTP_PORT}:80
+      - ${HTTP_PORT:-127.0.0.1:8280}:80
     volumes:
       - .:/var/www/html/tt-rss:ro
     depends_on:
       - app
+
+volumes:
+  ttrss-db:
