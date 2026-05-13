@@ -31,6 +31,7 @@ services:
       - ${TTRSS_ENV_FILE:-.env}
     volumes:
       - .:/var/www/html/tt-rss
+      - ttrss-hidden-data:/var/www/html/tt-rss/data
       - ./data/cache:/var/www/html/tt-rss/cache
       - ./data/lock:/var/www/html/tt-rss/lock
       - ./data/plugins.local:/var/www/html/tt-rss/plugins.local
@@ -51,6 +52,7 @@ services:
       - ${TTRSS_ENV_FILE:-.env}
     volumes:
       - .:/var/www/html/tt-rss
+      - ttrss-hidden-data:/var/www/html/tt-rss/data
       - ./data/cache:/var/www/html/tt-rss/cache
       - ./data/lock:/var/www/html/tt-rss/lock
       - ./data/plugins.local:/var/www/html/tt-rss/plugins.local
@@ -69,9 +71,13 @@ services:
       - ${HTTP_PORT:-127.0.0.1:8280}:80
     volumes:
       - .:/var/www/html/tt-rss:ro
+      - ttrss-hidden-data:/var/www/html/tt-rss/data:ro
       - ./data/cache:/var/www/html/tt-rss/cache:ro
       - ./data/plugins.local:/var/www/html/tt-rss/plugins.local:ro
       - ./data/templates.local:/var/www/html/tt-rss/templates.local:ro
       - ./data/themes.local:/var/www/html/tt-rss/themes.local:ro
     depends_on:
       - app
+
+volumes:
+  ttrss-hidden-data:

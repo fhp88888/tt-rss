@@ -61,6 +61,10 @@ and `OWNER_GID`, both defaulting to `1000`. It also lets the container generate
 the ignored root-level `config.php` required by the upstream image startup
 script.
 
+The deploy compose hides the host `data/` directory inside app containers so
+the upstream startup script cannot recursively change ownership of PostgreSQL
+files.
+
 First deployment:
 
 ```bash
