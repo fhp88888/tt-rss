@@ -8,6 +8,8 @@ final class HeadlineThumbnailRenderingTest extends TestCase {
 		$theme_less = file_get_contents(dirname(__DIR__) . "/themes/light/tt-rss.less");
 
 		$this->assertStringContainsString('Article::_get_image', $feeds_php);
+		$this->assertStringContainsString('Article::_get_image($line["enclosures"]["entries"],' . "\n" . "\t\t\t\t\t" . '"",', $feeds_php);
+		$this->assertStringContainsString('Article::_get_image([],' . "\n" . "\t\t\t\t\t\t" . '$content_for_image,', $feeds_php);
 		$this->assertStringContainsString('"flavor_image"', $feeds_php);
 		$this->assertStringContainsString('headline-thumbnail', $headlines_js);
 		$this->assertStringContainsString('headline-thumbnail-image', $headlines_js);
@@ -17,6 +19,8 @@ final class HeadlineThumbnailRenderingTest extends TestCase {
 		$this->assertStringContainsString('onerror', $headlines_js);
 		$this->assertStringContainsString('closest(\'.headline-thumbnail\').remove()', $headlines_js);
 		$this->assertStringContainsString('.headline-thumbnail', $theme_less);
-		$this->assertStringContainsString('object-fit : cover', $theme_less);
+		$this->assertStringContainsString('flex : 0 0 80px', $theme_less);
+		$this->assertStringContainsString('height : 80px', $theme_less);
+		$this->assertStringContainsString('object-fit : contain', $theme_less);
 	}
 }

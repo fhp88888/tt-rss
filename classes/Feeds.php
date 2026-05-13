@@ -321,9 +321,16 @@ class Feeds extends Handler_Protected {
 				}
 
 				[$flavor_image, $flavor_stream, $flavor_kind] = Article::_get_image($line["enclosures"]["entries"],
-					$content_for_image,
+					"",
 					$line["site_url"] ?? "",
 					$line);
+
+				if (!$flavor_image && !$flavor_stream) {
+					[$flavor_image, $flavor_stream, $flavor_kind] = Article::_get_image([],
+						$content_for_image,
+						$line["site_url"] ?? "",
+						$line);
+				}
 
 				$line["flavor_image"] = $flavor_image;
 				$line["flavor_stream"] = $flavor_stream;
