@@ -306,6 +306,8 @@ class Feeds extends Handler_Protected {
 					},
 					$line);
 
+				$content_for_image = $line["content"];
+
 				$line["content"] = Sanitizer::sanitize($line["content"],
 					$line['hide_images'], null, $line["site_url"], $highlight_words, $line["id"]);
 
@@ -317,6 +319,17 @@ class Feeds extends Handler_Protected {
 				} else {
 					$line["enclosures"] = [ 'formatted' => '', 'entries' => [] ];
 				}
+
+				[$flavor_image, $flavor_stream, $flavor_kind] = Article::_get_image($line["enclosures"]["entries"],
+					$content_for_image,
+					$line["site_url"] ?? "",
+					$line);
+
+				$line["flavor_image"] = $flavor_image;
+				$line["flavor_stream"] = $flavor_stream;
+
+				if ($flavor_kind)
+					$line["flavor_kind"] = $flavor_kind;
 
 				$line["updated_ts"] = strtotime($line["updated"] ?? '') ?: 0;
 				$line["updated_long"] = TimeHelper::make_local_datetime($line["updated"]);

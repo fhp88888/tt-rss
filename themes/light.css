@@ -420,6 +420,33 @@ body.ttrss_main .hl .headline-main {
   min-width: 0;
   padding-right: 14px;
 }
+body.ttrss_main .hl .headline-body {
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+body.ttrss_main .hl .headline-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+body.ttrss_main .hl .headline-thumbnail {
+  align-self: center;
+  flex: 0 0 96px;
+  height: 72px;
+  margin: 2px 0 0;
+  overflow: hidden;
+  padding: 0;
+}
+body.ttrss_main .hl .headline-thumbnail-image {
+  border-radius: 6px;
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
 body.ttrss_main .hl .headline-meta {
   display: flex;
   align-items: center;
@@ -775,6 +802,8 @@ body.ttrss_main #feeds-holder #feedTree .dijitTreeNode .dijitTreeRow .dijitTreeL
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
+  /* Segoe UI (@fonts-ui) seems to have wrong baseline set */
+  /* top : -0.5px; */
 }
 body.ttrss_main #feeds-holder #feedTree .dijitTreeNode .dijitTreeRow .dijitTreeLabel.Unread {
   font-weight: bold;

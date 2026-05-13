@@ -469,6 +469,37 @@ body.ttrss_main {
 			padding-right : 14px;
 		}
 
+		.headline-body {
+			display : flex;
+			gap : 12px;
+			min-width : 0;
+		}
+
+		.headline-text {
+			display : flex;
+			flex : 1 1 auto;
+			flex-direction : column;
+			gap : 5px;
+			min-width : 0;
+		}
+
+		.headline-thumbnail {
+			align-self : center;
+			flex : 0 0 96px;
+			height : 72px;
+			margin : 2px 0 0;
+			overflow : hidden;
+			padding : 0;
+		}
+
+		.headline-thumbnail-image {
+			border-radius : 6px;
+			display : block;
+			height : 100%;
+			object-fit : cover;
+			width : 100%;
+		}
+
 		.headline-meta {
 			display : flex;
 			align-items : center;
@@ -895,8 +926,8 @@ body.ttrss_main {
 						text-overflow : ellipsis;
 						position : relative;
 
-						// Segoe UI (@fonts-ui) seems to have wrong baseline set
-						// top : -0.5px;
+						/* Segoe UI (@fonts-ui) seems to have wrong baseline set */
+						/* top : -0.5px; */
 
 						&.Unread {
 							font-weight : bold;

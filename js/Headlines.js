@@ -268,6 +268,13 @@ const Headlines = {
 		let row = null;
 		const preview_class = hl.content_preview_is_ai ? "preview ai-summary" : "preview";
 		const relative_time = this.formatRelativeTime(hl.updated_ts);
+		const thumbnail = hl.flavor_image ?
+			`<div class="headline-thumbnail">
+				<img class="headline-thumbnail-image" alt="" loading="lazy"
+					onload="Headlines.validateThumbnail(this)"
+					onerror="this.closest('.headline-thumbnail').remove()"
+					src="${App.escapeHtml(App.sanitizeUrl(hl.flavor_image))}">
+			</div>` : "";
 
 		let row_class = "";
 
@@ -311,11 +318,16 @@ const Headlines = {
 					<span class="feed-name">${App.escapeHtml(hl.feed_title)}</span>
 					<span class="relative-time" title="${App.escapeHtml(hl.updated_long)}">${relative_time}</span>
 				</div>
-				<span data-article-id="${hl.id}" class="hl-content headline-title-line hlMenuAttach">
-					<a class="title" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">${hl.title}</a>
-					${Article.renderLabels(hl.id, hl.labels)}
-				</span>
-				<span class="${preview_class} headline-preview">${hl.content_preview}</span>
+				<div class="headline-body">
+					<div class="headline-text">
+						<span data-article-id="${hl.id}" class="hl-content headline-title-line hlMenuAttach">
+							<a class="title" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">${hl.title}</a>
+							${Article.renderLabels(hl.id, hl.labels)}
+						</span>
+						<span class="${preview_class} headline-preview">${hl.content_preview}</span>
+					</div>
+					${thumbnail}
+				</div>
 			</div>
 			</div>
 		`;
@@ -329,6 +341,11 @@ const Headlines = {
 		PluginHost.run(PluginHost.HOOK_HEADLINE_RENDERED, tmp.firstChild);
 
 		return tmp.firstChild;
+	},
+	validateThumbnail: function (img) {
+		if (img.naturalWidth < 160 || img.naturalHeight < 90) {
+			img.closest('.headline-thumbnail').remove();
+		}
 	},
 	formatRelativeTime: function (timestamp) {
 		const ts = parseInt(timestamp);
