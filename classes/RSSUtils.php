@@ -1269,6 +1269,9 @@ class RSSUtils {
 				}
 
 				Debug::log("commit pdo transaction...", Debug::LOG_VERBOSE);
+				if ($base_record_created || $entry_current_hash !== $entry_stored_hash || isset($_REQUEST["force_rehash"])) {
+					AISummary::enqueue_entry($entry_ref_id, $feed_obj->owner_uid, $entry_current_hash);
+				}
 				$pdo->commit();
 
 				Debug::log("article processed.", Debug::LOG_VERBOSE);

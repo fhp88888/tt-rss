@@ -12,7 +12,7 @@ if (!class_exists('Config')) {
 	class Config {
 		const DB_TYPE = 'DB_TYPE';
 		const SELF_URL_PATH = 'SELF_URL_PATH';
-		const SCHEMA_VERSION = 151;
+			const SCHEMA_VERSION = 153;
 		const ENCRYPTION_KEY = 'ENCRYPTION_KEY';
 		
 		public static function get(string $key) {

@@ -15,4 +15,16 @@ final class AISummaryTest extends TestCase {
 		$this->assertStringContainsString("标题：Example title", $prompt);
 		$this->assertStringContainsString("文章：\nThis is an English article body.", $prompt);
 	}
+
+	public function test_has_current_summary_requires_non_empty_matching_hash(): void {
+		$this->assertTrue(AISummary::has_current_summary('Summary', 'hash-a', 'hash-a'));
+		$this->assertFalse(AISummary::has_current_summary('', 'hash-a', 'hash-a'));
+		$this->assertFalse(AISummary::has_current_summary('Summary', 'hash-b', 'hash-a'));
+		$this->assertFalse(AISummary::has_current_summary(null, 'hash-a', 'hash-a'));
+	}
+
+	public function test_should_display_cached_summary_requires_user_opt_in(): void {
+		$this->assertTrue(AISummary::should_display_cached_summary(true, 'Summary', 'hash-a', 'hash-a'));
+		$this->assertFalse(AISummary::should_display_cached_summary(false, 'Summary', 'hash-a', 'hash-a'));
+	}
 }

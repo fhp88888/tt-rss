@@ -40,21 +40,30 @@ class RPC extends Handler_Protected {
 	}
 
 
-	function togglepref(): void {
-		$key = clean($_REQUEST["key"]);
-		$profile = $_SESSION['profile'] ?? null;
-		Prefs::set($key, !Prefs::get($key, $_SESSION['uid'], $profile), $_SESSION['uid'], $profile);
-		$value = Prefs::get($key, $_SESSION['uid'], $profile);
+		function togglepref(): void {
+			$key = clean($_REQUEST["key"]);
+			$profile = $_SESSION['profile'] ?? null;
+			if (in_array($key, [Prefs::COMBINED_DISPLAY_MODE, Prefs::CDM_EXPANDED, Prefs::CDM_ENABLE_GRID])) {
+				print json_encode(["param" => $key, "value" => false]);
+				return;
+			}
+
+			Prefs::set($key, !Prefs::get($key, $_SESSION['uid'], $profile), $_SESSION['uid'], $profile);
+			$value = Prefs::get($key, $_SESSION['uid'], $profile);
 
 		print json_encode(["param" =>$key, "value" => $value]);
 	}
 
 	function setpref(): void {
-		// set_pref escapes input, so no need to double escape it here
-		$key = clean($_REQUEST['key']);
-		$value = $_REQUEST['value'];
+			// set_pref escapes input, so no need to double escape it here
+			$key = clean($_REQUEST['key']);
+			$value = $_REQUEST['value'];
+			if (in_array($key, [Prefs::COMBINED_DISPLAY_MODE, Prefs::CDM_EXPANDED, Prefs::CDM_ENABLE_GRID])) {
+				print json_encode(["param" =>$key, "value" => false]);
+				return;
+			}
 
-		Prefs::set($key, $value, $_SESSION['uid'], $_SESSION['profile'] ?? null, $key != 'USER_STYLESHEET');
+			Prefs::set($key, $value, $_SESSION['uid'], $_SESSION['profile'] ?? null, $key != 'USER_STYLESHEET');
 
 		print json_encode(["param" =>$key, "value" => $value]);
 	}
@@ -341,14 +350,17 @@ class RPC extends Handler_Protected {
 		$profile = $_SESSION['profile'] ?? null;
 		$params = [];
 
-		foreach ([Prefs::ON_CATCHUP_SHOW_NEXT_FEED, Prefs::HIDE_READ_FEEDS,
-			Prefs::ENABLE_FEED_CATS, Prefs::FEEDS_SORT_BY_UNREAD,
-			Prefs::CONFIRM_FEED_CATCHUP,  Prefs::CDM_AUTO_CATCHUP,
-			Prefs::FRESH_ARTICLE_MAX_AGE, Prefs::RECENTLY_READ_MAX_AGE, Prefs::HIDE_READ_SHOWS_SPECIAL,
-			Prefs::COMBINED_DISPLAY_MODE, Prefs::DEBUG_HEADLINE_IDS, Prefs::CDM_ENABLE_GRID] as $param) {
+			foreach ([Prefs::ON_CATCHUP_SHOW_NEXT_FEED, Prefs::HIDE_READ_FEEDS,
+				Prefs::ENABLE_FEED_CATS, Prefs::FEEDS_SORT_BY_UNREAD,
+				Prefs::CONFIRM_FEED_CATCHUP,  Prefs::CDM_AUTO_CATCHUP,
+				Prefs::FRESH_ARTICLE_MAX_AGE, Prefs::RECENTLY_READ_MAX_AGE, Prefs::HIDE_READ_SHOWS_SPECIAL,
+				Prefs::DEBUG_HEADLINE_IDS] as $param) {
 
-			$params[strtolower($param)] = (int) Prefs::get($param, $_SESSION['uid'], $profile);
-		}
+				$params[strtolower($param)] = (int) Prefs::get($param, $_SESSION['uid'], $profile);
+			}
+
+			$params["combined_display_mode"] = 0;
+			$params["cdm_enable_grid"] = 0;
 
 		$params["safe_mode"] = !empty($_SESSION["safe_mode"]);
 		$params["check_for_updates"] = Config::get(Config::CHECK_FOR_UPDATES);
@@ -505,9 +517,8 @@ class RPC extends Handler_Protected {
 				"article_page_down" => __("Scroll down page"),
 				"article_page_up" => __("Scroll up page"),
 				"email_article" => __("Email article"),
-				"close_article" => __("Close/collapse article"),
-				"toggle_expand" => __("Toggle article expansion (combined mode)"),
-				"toggle_widescreen" => __("Toggle widescreen mode"),
+					"close_article" => __("Close/collapse article"),
+					"toggle_widescreen" => __("Toggle widescreen mode"),
 				"toggle_full_text" => __("Toggle full article text via Readability")],
 			__("Feed") => [
 				"feed_refresh" => __("Refresh current feed"),
@@ -518,11 +529,9 @@ class RPC extends Handler_Protected {
 				"feed_toggle_vgroup" => __("Toggle headline grouping"),
 				"feed_toggle_grid" => __("Toggle grid view"),
 				"feed_debug_update" => __("Debug feed update"),
-				"feed_debug_viewfeed" => __("Debug viewfeed()"),
-				"catchup_all" => __("Mark all feeds as read"),
-				"cat_toggle_collapse" => __("Un/collapse current category"),
-				"toggle_cdm_expanded" => __("Toggle auto expand in combined mode"),
-				"toggle_combined_mode" => __("Toggle combined mode")],
+					"feed_debug_viewfeed" => __("Debug viewfeed()"),
+					"catchup_all" => __("Mark all feeds as read"),
+					"cat_toggle_collapse" => __("Un/collapse current category")],
 			__("Go to") => [
 				"goto_all" => __("All articles"),
 				"goto_fresh" => __("Fresh"),
@@ -547,8 +556,7 @@ class RPC extends Handler_Protected {
 	}
 
 	/**
-	 * {3} - 3 panel mode only
-	 * {C} - combined mode only
+		 * {3} - three-panel mode only
 	 *
 	 * @return array{0: array<int, string>, 1: array<string, string>} $prefixes, $hotkeys
 	 */
@@ -582,8 +590,7 @@ class RPC extends Handler_Protected {
 			"a W" => "toggle_widescreen",
 			"a e" => "toggle_full_text",
 			"e" => "email_article",
-			"a q" => "close_article",
-			"a s" => "article_span_grid",
+				"a q" => "close_article",
 			"f r" => "feed_refresh",
 			"f a" => "feed_unhide_read",
 			"f s" => "feed_subscribe",
@@ -592,9 +599,7 @@ class RPC extends Handler_Protected {
 			"f g" => "feed_toggle_vgroup",
 			"f G" => "feed_toggle_grid",
 			"f D" => "feed_debug_update",
-			"f %" => "feed_debug_viewfeed",
-			"f C" => "toggle_combined_mode",
-			"f c" => "toggle_cdm_expanded",
+				"f %" => "feed_debug_viewfeed",
 			"Q" => "catchup_all",
 			"x" => "cat_toggle_collapse",
 			"g a" => "goto_all",

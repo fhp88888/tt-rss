@@ -1945,6 +1945,45 @@ body.ttrss_prefs fieldset.prefs .help-text {
 body.ttrss_prefs fieldset.prefs .help-text-bottom {
   margin-top: 10px;
 }
+body.ttrss_prefs .ai-settings-form fieldset.prefs {
+  gap: 12px;
+}
+body.ttrss_prefs .ai-settings-form fieldset.prefs > table {
+  border-collapse: collapse;
+  max-width: 100%;
+}
+body.ttrss_prefs .ai-settings-form fieldset.prefs > table th,
+body.ttrss_prefs .ai-settings-form fieldset.prefs > table td {
+  padding: 3px 14px 3px 0;
+  white-space: nowrap;
+}
+body.ttrss_prefs .ai-settings-form fieldset.prefs .dijitTextBox,
+body.ttrss_prefs .ai-settings-form fieldset.prefs .dijitSpinner {
+  max-width: 100%;
+}
+body.ttrss_prefs .ai-settings-form fieldset.prefs input[name="AI_ENDPOINT"],
+body.ttrss_prefs .ai-settings-form fieldset.prefs input[name="AI_MODEL"],
+body.ttrss_prefs .ai-settings-form fieldset.prefs input[name="AI_API_KEY"] {
+  box-sizing: border-box;
+  max-width: 520px;
+  width: 100%;
+}
+@media (width <= 640px) {
+  body.ttrss_prefs .ai-settings-form fieldset.prefs {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  body.ttrss_prefs .ai-settings-form fieldset.prefs label:first-of-type {
+    min-width: 0;
+  }
+  body.ttrss_prefs .ai-settings-form fieldset.prefs > table {
+    width: 100%;
+  }
+  body.ttrss_prefs .ai-settings-form fieldset.prefs > table th,
+  body.ttrss_prefs .ai-settings-form fieldset.prefs > table td {
+    white-space: normal;
+  }
+}
 body.ttrss_prefs table th {
   text-align: left;
 }

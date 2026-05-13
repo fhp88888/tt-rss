@@ -79,7 +79,7 @@ class Prefs {
 		Prefs::SHOW_CONTENT_PREVIEW => [ true, Config::T_BOOL ],
 		Prefs::SHORT_DATE_FORMAT => [ "M d, G:i", Config::T_STRING ],
 		Prefs::LONG_DATE_FORMAT => [ "D, M d Y - G:i", Config::T_STRING ],
-		Prefs::COMBINED_DISPLAY_MODE => [ true, Config::T_BOOL ],
+			Prefs::COMBINED_DISPLAY_MODE => [ false, Config::T_BOOL ],
 		Prefs::HIDE_READ_FEEDS => [ false, Config::T_BOOL ],
 		Prefs::ON_CATCHUP_SHOW_NEXT_FEED => [ false, Config::T_BOOL ],
 		Prefs::FEEDS_SORT_BY_UNREAD => [ false, Config::T_BOOL ],

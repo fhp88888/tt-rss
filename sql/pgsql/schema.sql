@@ -170,6 +170,18 @@ create index ttrss_entries_date_entered_index on ttrss_entries(date_entered);
 create index ttrss_entries_updated_idx on ttrss_entries(updated);
 create index ttrss_entries_tsvector_combined_idx on ttrss_entries using gin(tsvector_combined);
 
+create table ttrss_ai_summary_queue (
+	owner_uid integer not null references ttrss_users(id) ON DELETE CASCADE,
+	ref_id integer not null references ttrss_entries(id) ON DELETE CASCADE,
+	content_hash varchar(250) not null,
+	queued_at timestamp not null default NOW(),
+	attempts integer not null default 0,
+	last_error text,
+	primary key (owner_uid, ref_id));
+
+create index ttrss_ai_summary_queue_owner_uid_idx on ttrss_ai_summary_queue(owner_uid);
+create index ttrss_ai_summary_queue_queued_at_idx on ttrss_ai_summary_queue(queued_at);
+
 create table ttrss_user_entries (
 	int_id serial not null primary key,
 	ref_id integer not null references ttrss_entries(id) ON DELETE CASCADE,

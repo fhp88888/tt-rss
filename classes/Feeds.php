@@ -190,6 +190,7 @@ class Feeds extends Handler_Protected {
 					$feed, $cat_view, $qfh_ret);
 
 		$headlines_count = 0;
+		$ai_summaries_enabled = (bool) Prefs::get(Prefs::AI_SUMMARIES_ENABLED, $_SESSION['uid']);
 
 		if ($result instanceof PDOStatement) {
 			while ($line = $result->fetch(PDO::FETCH_ASSOC)) {
@@ -199,7 +200,7 @@ class Feeds extends Handler_Protected {
 				if (!Prefs::get(Prefs::SHOW_CONTENT_PREVIEW, $_SESSION['uid'], $profile)) {
 					$line["content_preview"] = "";
 					$line["content_preview_is_ai"] = false;
-				} else if (!empty($line["ai_summary"]) && $line["ai_summary_content_hash"] === $line["content_hash"]) {
+				} else if (AISummary::should_display_cached_summary($ai_summaries_enabled, $line["ai_summary"], $line["ai_summary_content_hash"], $line["content_hash"])) {
 					$line["content_preview"] = Sanitizer::sanitize($line["ai_summary"]);
 					$line["content_preview_is_ai"] = true;
 				} else {
@@ -215,7 +216,7 @@ class Feeds extends Handler_Protected {
 						$line, $max_excerpt_length);
 				}
 
-				if (!empty($line["ai_summary"]) && $line["ai_summary_content_hash"] === $line["content_hash"]) {
+				if (AISummary::should_display_cached_summary($ai_summaries_enabled, $line["ai_summary"], $line["ai_summary_content_hash"], $line["content_hash"])) {
 					$line["ai_summary"] = Sanitizer::sanitize($line["ai_summary"]);
 				} else {
 					$line["ai_summary"] = "";

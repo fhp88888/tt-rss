@@ -55,17 +55,12 @@ class Pref_Prefs extends Handler_Protected {
 				Prefs::HIDE_READ_FEEDS,
 				Prefs::HIDE_READ_SHOWS_SPECIAL,
 			],
-			__('Articles') => [
-				Prefs::PURGE_OLD_DAYS,
-				Prefs::PURGE_UNREAD_ARTICLES,
-				self::BLOCK_SEPARATOR,
-				Prefs::COMBINED_DISPLAY_MODE,
-				Prefs::CDM_EXPANDED,
-				Prefs::CDM_ENABLE_GRID,
-				self::BLOCK_SEPARATOR,
-				Prefs::CDM_AUTO_CATCHUP,
-				Prefs::VFEED_GROUP_BY_FEED,
-				self::BLOCK_SEPARATOR,
+				__('Articles') => [
+					Prefs::PURGE_OLD_DAYS,
+					Prefs::PURGE_UNREAD_ARTICLES,
+					self::BLOCK_SEPARATOR,
+					Prefs::VFEED_GROUP_BY_FEED,
+					self::BLOCK_SEPARATOR,
 				Prefs::SHOW_CONTENT_PREVIEW,
 				Prefs::STRIP_IMAGES,
 			],
@@ -98,10 +93,7 @@ class Pref_Prefs extends Handler_Protected {
 		$this->pref_help = [
 			Prefs::BLACKLISTED_TAGS => [__("Blacklisted tags"), ""],
 			Prefs::DEFAULT_SEARCH_LANGUAGE => [__("Default language"), __("Used for full-text search")],
-			Prefs::CDM_AUTO_CATCHUP => [__("Mark read on scroll"), __("Mark articles as read as you scroll past them")],
-			Prefs::CDM_EXPANDED => [__("Always expand articles")],
-			Prefs::COMBINED_DISPLAY_MODE => [__("Combined mode"), __("Show flat list of articles instead of separate panels")],
-			Prefs::CONFIRM_FEED_CATCHUP => [__("Confirm marking feeds as read")],
+				Prefs::CONFIRM_FEED_CATCHUP => [__("Confirm marking feeds as read")],
 			Prefs::DEFAULT_UPDATE_INTERVAL => [__("Default update interval")],
 			Prefs::DIGEST_CATCHUP => [__("Mark sent articles as read")],
 			Prefs::DIGEST_ENABLE => [__("Enable digest"), __("Send daily digest of new (and unread) headlines to your email address")],
@@ -127,8 +119,7 @@ class Pref_Prefs extends Handler_Protected {
 			Prefs::HEADLINES_NO_DISTINCT => [__("Don't enforce DISTINCT headlines"), __("May produce duplicate entries")],
 			Prefs::DEBUG_HEADLINE_IDS => [__("Show article and feed IDs"), __("In the headlines buffer")],
 			Prefs::DISABLE_CONDITIONAL_COUNTERS => [__("Disable conditional counter updates"), __("May increase server load")],
-			Prefs::CDM_ENABLE_GRID => [__("Grid view"), __("On wider screens, if always expanded")],
-			Prefs::DIGEST_MIN_SCORE => [__("Required score"), __("Include articles with this or above score")],
+				Prefs::DIGEST_MIN_SCORE => [__("Required score"), __("Include articles with this or above score")],
 		];
 
 		// hidden in the main prefs UI (use to hide things that have description set above)
@@ -195,11 +186,15 @@ class Pref_Prefs extends Handler_Protected {
 
 		$need_reload = false;
 
-		foreach (array_keys($_POST) as $pref_name) {
+			foreach (array_keys($_POST) as $pref_name) {
 
-			$value = $_POST[$pref_name];
+				$value = $_POST[$pref_name];
 
-			switch ($pref_name) {
+				if ($pref_name === Prefs::AI_API_KEY && trim((string) $value) === "") {
+					continue;
+				}
+
+				switch ($pref_name) {
 				case Prefs::DIGEST_PREFERRED_TIME:
 					if (Prefs::get(Prefs::DIGEST_PREFERRED_TIME, $_SESSION['uid']) != $value) {
 
@@ -231,15 +226,15 @@ class Pref_Prefs extends Handler_Protected {
 
 	function index_ai(): void {
 		$owner_uid = (int) $_SESSION["uid"];
-		$enabled = (bool) Prefs::get(Prefs::AI_SUMMARIES_ENABLED, $owner_uid);
-		$endpoint = (string) Prefs::get(Prefs::AI_ENDPOINT, $owner_uid);
-		$model = (string) Prefs::get(Prefs::AI_MODEL, $owner_uid);
-		$api_key = (string) Prefs::get(Prefs::AI_API_KEY, $owner_uid);
-		$max_chars = (string) Prefs::get(Prefs::AI_SUMMARY_MAX_CHARS, $owner_uid);
-		$concurrency = (string) Prefs::get(Prefs::AI_SUMMARY_CONCURRENCY, $owner_uid);
-		$status = AISummary::get_status($owner_uid);
-		?>
-		<form dojoType='dijit.form.Form' id='aiSettingsForm'>
+			$enabled = (bool) Prefs::get(Prefs::AI_SUMMARIES_ENABLED, $owner_uid);
+			$endpoint = (string) Prefs::get(Prefs::AI_ENDPOINT, $owner_uid);
+			$model = (string) Prefs::get(Prefs::AI_MODEL, $owner_uid);
+			$has_api_key = trim((string) Prefs::get(Prefs::AI_API_KEY, $owner_uid)) !== "";
+			$max_chars = (string) Prefs::get(Prefs::AI_SUMMARY_MAX_CHARS, $owner_uid);
+			$concurrency = (string) Prefs::get(Prefs::AI_SUMMARY_CONCURRENCY, $owner_uid);
+			$status = AISummary::get_status($owner_uid);
+			?>
+			<form dojoType='dijit.form.Form' id='aiSettingsForm' class='ai-settings-form'>
 			<?= \Controls\hidden_tag("op", "Pref_Prefs") ?>
 			<?= \Controls\hidden_tag("method", "saveconfig") ?>
 			<?= \Controls\hidden_tag("boolean_prefs", Prefs::AI_SUMMARIES_ENABLED) ?>
@@ -296,10 +291,13 @@ class Pref_Prefs extends Handler_Protected {
 						<?= \Controls\input_tag(Prefs::AI_MODEL, $model, "text", ["required" => true]) ?>
 					</fieldset>
 
-					<fieldset class='prefs'>
-						<label><?= __("API key") ?>:</label>
-						<?= \Controls\input_tag(Prefs::AI_API_KEY, $api_key, "password", ["autocomplete" => "off"]) ?>
-					</fieldset>
+						<fieldset class='prefs'>
+							<label><?= __("API key") ?>:</label>
+							<?= \Controls\input_tag(Prefs::AI_API_KEY, "", "password", [
+								"autocomplete" => "off",
+								"placeholder" => $has_api_key ? __("Saved; leave blank to keep current key") : __("Paste API key"),
+							]) ?>
+						</fieldset>
 
 					<fieldset class='prefs'>
 						<label><?= __("Maximum summary length") ?>:</label>

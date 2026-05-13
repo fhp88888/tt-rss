@@ -19,6 +19,38 @@ class AISummary {
 			trim((string) Prefs::get(Prefs::AI_API_KEY, $owner_uid)) !== "";
 	}
 
+	static function has_current_summary(?string $summary, ?string $summary_content_hash, string $content_hash): bool {
+		return trim((string) $summary) !== "" && $summary_content_hash === $content_hash;
+	}
+
+	static function should_display_cached_summary(bool $ai_summaries_enabled, ?string $summary, ?string $summary_content_hash, string $content_hash): bool {
+		return $ai_summaries_enabled && self::has_current_summary($summary, $summary_content_hash, $content_hash);
+	}
+
+	static function enqueue_entry(int $entry_id, int $owner_uid, string $content_hash): void {
+		if (!(bool) Prefs::get(Prefs::AI_SUMMARIES_ENABLED, $owner_uid)) return;
+
+		try {
+			$sth = Db::pdo()->prepare("INSERT INTO ttrss_ai_summary_queue
+					(owner_uid, ref_id, content_hash, queued_at, attempts, last_error)
+				VALUES
+					(:owner_uid, :ref_id, :content_hash, NOW(), 0, NULL)
+				ON CONFLICT (owner_uid, ref_id) DO UPDATE SET
+					content_hash = EXCLUDED.content_hash,
+					queued_at = NOW(),
+					attempts = 0,
+					last_error = NULL");
+
+			$sth->execute([
+				":owner_uid" => $owner_uid,
+				":ref_id" => $entry_id,
+				":content_hash" => $content_hash,
+			]);
+		} catch (Throwable $e) {
+			Debug::log("AI summary queue enqueue failed for entry $entry_id: " . $e->getMessage(), Debug::LOG_VERBOSE);
+		}
+	}
+
 	/**
 	 * @return array{total_articles:int,processed_articles:int,unprocessed_articles:int,queued_articles:int}
 	 */
@@ -40,12 +72,26 @@ class AISummary {
 		$total = (int) ($row["total_articles"] ?? 0);
 		$processed = (int) ($row["processed_articles"] ?? 0);
 		$unprocessed = max(0, $total - $processed);
+		$qsth = Db::pdo()->prepare("SELECT COUNT(*) AS queued_articles
+			FROM ttrss_ai_summary_queue q
+			JOIN ttrss_entries e ON e.id = q.ref_id
+			JOIN ttrss_user_entries ue ON ue.ref_id = q.ref_id AND ue.owner_uid = q.owner_uid
+			WHERE q.owner_uid = ?
+				AND q.content_hash = e.content_hash
+				AND (
+					e.ai_summary IS NULL
+					OR e.ai_summary = ''
+					OR e.ai_summary_content_hash IS DISTINCT FROM e.content_hash
+				)");
+
+		$qsth->execute([$owner_uid]);
+		$qrow = $qsth->fetch(PDO::FETCH_ASSOC) ?: [];
 
 		return [
 			"total_articles" => $total,
 			"processed_articles" => $processed,
 			"unprocessed_articles" => $unprocessed,
-			"queued_articles" => $unprocessed,
+			"queued_articles" => (int) ($qrow["queued_articles"] ?? 0),
 		];
 	}
 
@@ -54,23 +100,47 @@ class AISummary {
 
 		if ($concurrency <= 0 || !self::is_configured($owner_uid)) return 0;
 
-		$sth = Db::pdo()->prepare("SELECT e.id AS entry_id,
+		$ai_summary ??= new self();
+
+		return $ai_summary->generate_for_entries($ai_summary->claim_queue_entries($owner_uid), $owner_uid, $concurrency);
+	}
+
+	/**
+	 * @return array<int, array{entry_id:int,title:string,content:string,content_hash:string,attempts:int}>
+	 */
+	private function claim_queue_entries(int $owner_uid): array {
+		$sth = $this->pdo->prepare("WITH claimed AS (
+				DELETE FROM ttrss_ai_summary_queue q
+				WHERE q.ctid IN (
+					SELECT q2.ctid
+					FROM ttrss_ai_summary_queue q2
+					JOIN ttrss_entries e ON e.id = q2.ref_id
+					JOIN ttrss_user_entries ue ON ue.ref_id = q2.ref_id AND ue.owner_uid = q2.owner_uid
+					WHERE q2.owner_uid = :owner_uid
+						AND q2.queued_at <= NOW()
+						AND q2.attempts < 5
+						AND q2.content_hash = e.content_hash
+						AND (
+							e.ai_summary IS NULL
+							OR e.ai_summary = ''
+							OR e.ai_summary_content_hash IS DISTINCT FROM e.content_hash
+						)
+					ORDER BY q2.queued_at ASC
+					FOR UPDATE OF q2 SKIP LOCKED
+				)
+				RETURNING q.ref_id AS entry_id, q.content_hash, q.attempts
+			)
+			SELECT claimed.entry_id,
 				e.title,
 				e.content,
-				e.content_hash
-			FROM ttrss_entries e
-			JOIN ttrss_user_entries ue ON ue.ref_id = e.id
-			WHERE ue.owner_uid = ?
-				AND (
-					e.ai_summary IS NULL
-					OR e.ai_summary = ''
-					OR e.ai_summary_content_hash <> e.content_hash
-				)
-			ORDER BY e.date_entered DESC");
+				e.content_hash,
+				claimed.attempts
+			FROM claimed
+			JOIN ttrss_entries e ON e.id = claimed.entry_id");
 
-		$sth->execute([$owner_uid]);
+		$sth->execute([":owner_uid" => $owner_uid]);
 
-		return ($ai_summary ?? new self())->generate_for_entries($sth->fetchAll(PDO::FETCH_ASSOC), $owner_uid, $concurrency);
+		return $sth->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 	static function build_prompt(string $title, string $content, int $max_chars): string {
@@ -124,11 +194,17 @@ class AISummary {
 					ai_summary_generated_at = NOW()
 				WHERE id = :entry_id");
 
-			return $sth->execute([
+			$stored = $sth->execute([
 				":summary" => $summary,
 				":content_hash" => $content_hash,
 				":entry_id" => $entry_id,
 			]);
+
+			if ($stored) {
+				$this->delete_queue_entry($entry_id, $owner_uid);
+			}
+
+			return $stored;
 		} catch (Throwable $e) {
 			Debug::log("AI summary generation failed for entry $entry_id: " . $e->getMessage(), Debug::LOG_VERBOSE);
 		}
@@ -137,7 +213,7 @@ class AISummary {
 	}
 
 	/**
-	 * @param array<int, array{entry_id:int,title:string,content:string,content_hash:string}> $entries
+	 * @param array<int, array{entry_id:int,title:string,content:string,content_hash:string,attempts?:int}> $entries
 	 */
 	function generate_for_entries(array $entries, int $owner_uid, int $concurrency): int {
 		try {
@@ -168,20 +244,32 @@ class AISummary {
 			Each::ofLimit(
 				$requests(),
 				$concurrency,
-				function (?string $summary, int $entry_id) use ($tasks, $max_chars, &$generated): void {
-					if ($summary === null || !isset($tasks[$entry_id])) return;
+				function (?string $summary, int $entry_id) use ($tasks, $owner_uid, $max_chars, &$generated): void {
+					if (!isset($tasks[$entry_id])) return;
+
+					if ($summary === null) {
+						$this->record_queue_failure($entry_id, $owner_uid, $tasks[$entry_id]["content_hash"], (int)($tasks[$entry_id]["attempts"] ?? 0), "empty response");
+						return;
+					}
 
 					$summary = trim(strip_tags($summary));
-					if ($summary === "") return;
+					if ($summary === "") {
+						$this->record_queue_failure($entry_id, $owner_uid, $tasks[$entry_id]["content_hash"], (int)($tasks[$entry_id]["attempts"] ?? 0), "empty summary");
+						return;
+					}
 
 					$summary = truncate_string($summary, max(40, min(500, $max_chars)), "");
 
 					if ($this->store_summary($entry_id, $summary, $tasks[$entry_id]["content_hash"])) {
+						$this->delete_queue_entry($entry_id, $owner_uid);
 						++$generated;
 					}
 				},
-				function ($reason, int $entry_id): void {
+				function ($reason, int $entry_id) use ($tasks, $owner_uid): void {
 					$message = $reason instanceof Throwable ? $reason->getMessage() : (string) $reason;
+					if (isset($tasks[$entry_id])) {
+						$this->record_queue_failure($entry_id, $owner_uid, $tasks[$entry_id]["content_hash"], (int)($tasks[$entry_id]["attempts"] ?? 0), $message);
+					}
 					Debug::log("AI summary generation failed for entry $entry_id: $message", Debug::LOG_VERBOSE);
 				}
 			)->wait();
@@ -216,6 +304,35 @@ class AISummary {
 			":summary" => $summary,
 			":content_hash" => $content_hash,
 			":entry_id" => $entry_id,
+		]);
+	}
+
+	private function delete_queue_entry(int $entry_id, int $owner_uid): void {
+		$sth = $this->pdo->prepare("DELETE FROM ttrss_ai_summary_queue WHERE owner_uid = ? AND ref_id = ?");
+		$sth->execute([$owner_uid, $entry_id]);
+	}
+
+	private function record_queue_failure(int $entry_id, int $owner_uid, string $content_hash, int $attempts, string $message): void {
+		$next_attempts = $attempts + 1;
+		$delay_minutes = min(60, 2 ** min($next_attempts, 6));
+
+		$sth = $this->pdo->prepare("INSERT INTO ttrss_ai_summary_queue
+				(owner_uid, ref_id, content_hash, queued_at, attempts, last_error)
+			VALUES
+				(:owner_uid, :ref_id, :content_hash, NOW() + (CAST(:delay_minutes AS integer) * INTERVAL '1 minute'), :attempts, :last_error)
+			ON CONFLICT (owner_uid, ref_id) DO UPDATE SET
+				content_hash = EXCLUDED.content_hash,
+				queued_at = EXCLUDED.queued_at,
+				attempts = EXCLUDED.attempts,
+				last_error = EXCLUDED.last_error");
+
+		$sth->execute([
+			":content_hash" => $content_hash,
+			":delay_minutes" => $delay_minutes,
+			":attempts" => $next_attempts,
+			":last_error" => mb_substr($message, 0, 1000),
+			":owner_uid" => $owner_uid,
+			":ref_id" => $entry_id,
 		]);
 	}
 }

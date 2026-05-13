@@ -303,20 +303,12 @@ const App = {
 		}
 
 	},
-	isCombinedMode: function() {
-		return !!this.getInitParam("combined_display_mode");
-	},
-	setCombinedMode: function(combined) {
-		const value = combined ? "true" : "false";
-
-		xhr.post("backend.php", {op: "RPC", method: "setpref", key: "COMBINED_DISPLAY_MODE", value: value}, () => {
-			this.setInitParam("combined_display_mode",
-				!this.getInitParam("combined_display_mode"));
-
-			Article.close();
-			Headlines.renderAgain();
-		})
-	},
+		isCombinedMode: function() {
+			return false;
+		},
+		setCombinedMode: function() {
+			this.setInitParam("combined_display_mode", false);
+		},
 	isExpandedMode: function() {
 		return !!this.getInitParam("cdm_expanded");
 	},
@@ -1262,17 +1254,8 @@ const App = {
          this.hotkey_actions["help_dialog"] = () => {
             this.hotkeyHelp();
          };
-         this.hotkey_actions["toggle_combined_mode"] = () => {
-				App.setCombinedMode(!App.isCombinedMode());
-         };
-         this.hotkey_actions["toggle_cdm_expanded"] = () => {
-				App.setExpandedMode(!App.isExpandedMode());
-         };
-         this.hotkey_actions["article_span_grid"] = () => {
-            Article.cdmToggleGridSpan(Article.getActive());
-         };
-      }
-   },
+	      }
+	   },
    openPreferences: function(tab) {
       document.location.href = "prefs.php" + (tab ? "?tab=" + tab : "");
    },
@@ -1332,12 +1315,6 @@ const App = {
          case "qmcToggleWidescreen":
             App.setWideScreenMode(!App.isWideScreenMode());
             break;
-			case "qmcToggleCombined":
-				App.setCombinedMode(!App.isCombinedMode());
-				break;
-			case "qmcToggleExpanded":
-				App.setExpandedMode(!App.isExpandedMode());
-				break;
          case "qmcHKhelp":
             this.hotkeyHelp()
             break;

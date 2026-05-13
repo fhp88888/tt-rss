@@ -205,39 +205,21 @@
 							echo $result;
 						});
 
-						// hacky workaround for xgettext having difficulty extracting strings from 'JS in PHP' and 'PHP in JS in PHP'
-						$switch_to_three_panel = json_encode(__('Switch to three panel view'));
-						$switch_to_combined = json_encode(__('Switch to combined view'));
-						$disable_widescreen = json_encode(__('Disable widescreen mode'));
-						$enable_widescreen = json_encode(__('Enable widescreen mode'));
-						$expand_selected = json_encode(__('Expand selected article only'));
-						$expand_all = json_encode(__('Expand all articles'));
-					?>
+							$disable_widescreen = json_encode(__('Disable widescreen mode'));
+							$enable_widescreen = json_encode(__('Enable widescreen mode'));
+						?>
 
 					<div dojoType="fox.form.DropDownButton" class="action-button" title="<?= __('Actions...') ?>">
 						<span><i class="material-icons">menu</i></span>
 						<div dojoType="dijit.Menu" style="display: none">
-								<script type='dojo/method' event='onOpen' args='evt,a,b,c'>
-									const widescreen = this.getChildren().find((m) => m.id == 'qmcToggleWidescreen');
-									const expanded = this.getChildren().find((m) => m.id == 'qmcToggleExpanded');
-									const combined = this.getChildren().find((m) => m.id == 'qmcToggleCombined');
+									<script type='dojo/method' event='onOpen' args='evt,a,b,c'>
+										const widescreen = this.getChildren().find((m) => m.id == 'qmcToggleWidescreen');
 
-									if (combined)
-										combined.attr('label',
-											App.isCombinedMode() ? <?= $switch_to_three_panel ?> : <?= $switch_to_combined ?>);
-
-									if (widescreen)
-										widescreen
-											.attr('hidden', !!App.isCombinedMode())
-											.attr('label',
-												App.isWideScreenMode() ? <?= $disable_widescreen ?> : <?= $enable_widescreen ?>);
-
-									if (expanded)
-										expanded
-											.attr('hidden', !App.isCombinedMode())
-											.attr('label',
-												App.isExpandedMode() ? <?= $expand_selected ?> : <?= $expand_all ?>);
-								</script>
+										if (widescreen)
+											widescreen
+												.attr('label',
+													App.isWideScreenMode() ? <?= $disable_widescreen ?> : <?= $enable_widescreen ?>);
+									</script>
 
 								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcPrefs')"><?= __('Preferences...') ?></div>
 								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcSearch')"><?= __('Search...') ?></div>
@@ -247,15 +229,12 @@
 								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcEditFeed')"><?= __('Edit this feed...') ?></div>
 								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcRemoveFeed')"><?= __('Unsubscribe') ?></div>
 								<div dojoType="dijit.MenuItem" disabled="1"><?= __('All feeds:') ?></div>
-								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcCatchupAll')"><?= __('Mark as read') ?></div>
-								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcShowOnlyUnread')"><?= __('(Un)hide read feeds') ?></div>
-								<div dojoType="dijit.MenuItem" disabled="1"><?= __('UI layout:') ?></div>
-								<div dojoType="dijit.MenuItem" id="qmcToggleCombined" onclick="App.onActionSelected('qmcToggleCombined')"><?= __('Toggle combined mode') ?></div>
-								<div dojoType="dijit.MenuItem" id="qmcToggleWidescreen" onclick="App.onActionSelected('qmcToggleWidescreen')">
-									<?= __('Toggle widescreen mode') ?></div>
-								<div dojoType="dijit.MenuItem" id="qmcToggleExpanded" onclick="App.onActionSelected('qmcToggleExpanded')">
-									<?= __('Toggle expand all articles') ?></div>
-								<div dojoType="dijit.MenuItem" disabled="1"><?= __('Other actions:') ?></div>
+									<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcCatchupAll')"><?= __('Mark as read') ?></div>
+									<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcShowOnlyUnread')"><?= __('(Un)hide read feeds') ?></div>
+									<div dojoType="dijit.MenuItem" disabled="1"><?= __('UI layout:') ?></div>
+									<div dojoType="dijit.MenuItem" id="qmcToggleWidescreen" onclick="App.onActionSelected('qmcToggleWidescreen')">
+										<?= __('Toggle widescreen mode') ?></div>
+									<div dojoType="dijit.MenuItem" disabled="1"><?= __('Other actions:') ?></div>
                         <div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcHKhelp')"><?= __('Keyboard shortcuts help') ?></div>
 
                         <?php
