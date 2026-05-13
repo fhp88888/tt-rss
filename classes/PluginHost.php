@@ -73,8 +73,6 @@ class PluginHost {
 	/** @see Plugin::hook_render_article() */
 	const HOOK_RENDER_ARTICLE = "hook_render_article";
 
-	/** @see Plugin::hook_render_article_cdm() */
-	const HOOK_RENDER_ARTICLE_CDM = "hook_render_article_cdm";
 
 	/** @see Plugin::hook_feed_fetched() */
 	const HOOK_FEED_FETCHED = "hook_feed_fetched";

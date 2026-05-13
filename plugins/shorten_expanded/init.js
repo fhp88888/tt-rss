@@ -1,4 +1,4 @@
-/* global Plugins, __, require, PluginHost, App */
+/* global Plugins, __, require, App */
 
 Plugins.Shorten_Expanded = {
 	threshold: 1.5, // of window height
@@ -77,9 +77,5 @@ require(['dojo/_base/kernel', 'dojo/ready'], (dojo, ready) => {
 			});
 		}));
 
-		PluginHost.register(PluginHost.HOOK_ARTICLE_RENDERED_CDM, function(row) {
-			self.process_row(row);
-			return true;
-		});
 	});
 });

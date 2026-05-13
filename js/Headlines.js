@@ -13,45 +13,7 @@ const Headlines = {
 	_scroll_reset_timeout: false,
 	default_force_previous: false,
 	default_force_to_top: false,
-	default_move_on_expand: true,
 	line_scroll_offset: 120, /* px */
-	sticky_header_observer: new IntersectionObserver(
-		(entries) => {
-			entries.forEach((entry) => {
-				const header = entry.target.closest('.cdm').querySelector(".header");
-
-				if (entry.isIntersecting) {
-					header.removeAttribute("data-is-stuck");
-				} else {
-					header.setAttribute("data-is-stuck", "true");
-				}
-
-				//console.log(entry.target, entry.intersectionRatio, entry.isIntersecting, entry.boundingClientRect.top);
-			});
-		},
-		{threshold: [0, 1], root: document.querySelector("#headlines-frame")}
-	),
-	sticky_content_observer: new IntersectionObserver(
-		(entries) => {
-			entries.forEach((entry) => {
-				const header = entry.target.closest('.cdm').querySelector(".header");
-
-				header.style.position = entry.isIntersecting ? "sticky" : "unset";
-
-				//console.log(entry.target, entry.intersectionRatio, entry.isIntersecting, entry.boundingClientRect.top);
-			});
-		},
-		{threshold: [0, 1], root: document.querySelector("#headlines-frame")}
-	),
-	unpack_observer: new IntersectionObserver(
-		(entries) => {
-			entries.forEach((entry) => {
-				if (entry.intersectionRatio > 0)
-					Article.unpack(entry.target);
-			});
-		},
-		{threshold: [0], root: document.querySelector("#headlines-frame")}
-	),
 	row_observer: new MutationObserver((mutations) => {
 		const modified = [];
 
@@ -174,52 +136,12 @@ const Headlines = {
 			PluginHost.run(PluginHost.HOOK_HEADLINE_MUTATIONS_SYNCED, results);
 		});
 	},
-	click: function (event, id, in_body) {
-		in_body = in_body || false;
-
-		if (App.isCombinedMode()) {
-
-			if (event.altKey && !in_body) {
-
-				Article.openInNewWindow(id);
-				Headlines.toggleUnread(id, 0);
-
-			} else if (Article.getActive() !== id) {
-
-				const scroll_position_A = document.getElementById(`RROW-${id}`).offsetTop - document.getElementById("headlines-frame").scrollTop;
-
-				Article.setActive(id);
-
-				if (App.getInitParam("cdm_expanded")) {
-
-					if (!in_body)
-						Article.openInNewWindow(id);
-
-					Headlines.toggleUnread(id, 0);
-				} else {
-					const scroll_position_B = document.getElementById(`RROW-${id}`).offsetTop - document.getElementById("headlines-frame").scrollTop;
-
-					// this would only work if there's enough space
-					document.getElementById("headlines-frame").scrollTop -= scroll_position_A-scroll_position_B;
-
-					if (this.default_move_on_expand)
-						Article.cdmMoveToId(id);
-				}
-
-			} else if (in_body) {
-				Headlines.toggleUnread(id, 0);
-			} else { /* !in body */
-				Article.openInNewWindow(id);
-			}
-
-			return in_body;
+	click: function (event, id) {
+		if (event.altKey) {
+			Article.openInNewWindow(id);
+			Headlines.toggleUnread(id, 0);
 		} else {
-			if (event.altKey) {
-				Article.openInNewWindow(id);
-				Headlines.toggleUnread(id, 0);
-			} else {
-				Article.view(id);
-			}
+			Article.view(id);
 		}
 
 		return false;
@@ -276,15 +198,6 @@ const Headlines = {
 			}
 		}
 	},
-	unpackVisible: function(container) {
-		const rows = document.querySelectorAll('#headlines-frame > div[id*=RROW][data-content].cdm');
-
-		for (let i = 0; i < rows.length; i++) {
-			if (App.Scrollable.isChildVisible(rows[i], container)) {
-				Article.unpack(rows[i]);
-			}
-		}
-	},
 	scrollHandler: function (/*event*/) {
 		try {
 			if (!Feeds.infscroll_disabled && !Feeds.infscroll_in_progress) {
@@ -305,29 +218,6 @@ const Headlines = {
 				}
 			}
 
-			if (App.isCombinedMode() && App.getInitParam("cdm_expanded")) {
-				const container = document.getElementById("headlines-frame")
-
-				/* don't do anything until there was some scrolling */
-				if (container.scrollTop > 0)
-					Headlines.unpackVisible(container);
-			}
-
-			if (App.getInitParam("cdm_auto_catchup")) {
-
-				const rows = document.querySelectorAll('#headlines-frame > div[id*=RROW][class*=Unread]');
-
-				for (let i = 0; i < rows.length; i++) {
-					const row = rows[i];
-
-					if (document.getElementById("headlines-frame").scrollTop > (row.offsetTop + row.offsetHeight / 2)) {
-						row.classList.remove('Unread');
-					} else {
-						break;
-					}
-				}
-			}
-
 			PluginHost.run(PluginHost.HOOK_HEADLINES_SCROLL_HANDLER);
 
 		} catch (e) {
@@ -340,19 +230,13 @@ const Headlines = {
 	setCommonClasses: function (headlines_count) {
 		const container = document.getElementById("headlines-frame");
 
-		container.classList.remove('cdm', 'normal');
+		container.classList.remove('normal');
 
-		container.classList.add(App.isCombinedMode() ? 'cdm' : 'normal');
-		container.setAttribute("data-enable-grid", App.getInitParam("cdm_enable_grid") ? "true" : "false");
+		container.classList.add('normal');
 		container.setAttribute("data-headlines-count", parseInt(headlines_count));
-		container.setAttribute("data-is-cdm", App.isCombinedMode() ? "true" : "false");
-		container.setAttribute("data-is-cdm-expanded", App.getInitParam("cdm_expanded"));
 
 		// for floating title because it's placed outside of headlines-frame
 		document.getElementById('main').classList.remove('expandable', 'expanded');
-
-		if (App.isCombinedMode())
-			document.getElementById('main').classList.add(App.getInitParam('cdm_expanded') ? 'expanded' : 'expandable');
 	},
 	renderAgain: function () {
 		// TODO: wrap headline elements into a knockoutjs model to prevent all this stuff
@@ -371,26 +255,10 @@ const Headlines = {
 					new_row.classList.add('active');
 					Article.unpack(new_row);
 
-					if (App.isCombinedMode())
-						Article.cdmMoveToId(id, {noscroll: true});
-					else
-						Article.view(id);
+					Article.view(id);
 				}
 			}
 		});
-
-		document.querySelectorAll('.cdm .header-sticky-guard').forEach((e) => {
-			this.sticky_header_observer.observe(e)
-		});
-
-		document.querySelectorAll('.cdm .content').forEach((e) => {
-			this.sticky_content_observer.observe(e)
-		});
-
-		if (App.getInitParam("cdm_expanded"))
-			document.querySelectorAll('#headlines-frame > div[id*=RROW].cdm').forEach((e) => {
-				this.unpack_observer.observe(e)
-			});
 
 		dijit.byId('main').resize();
 
@@ -426,86 +294,7 @@ const Headlines = {
 			this.vgroup_last_feed = hl.feed_id;
 		}
 
-		if (App.isCombinedMode()) {
-			row_class += App.getInitParam("cdm_expanded") ? " expanded" : " expandable";
-
-			const comments = Article.formatComments(hl);
-
-			row = `<div class="cdm ${row_class} ${Article.getScoreClass(hl.score)}"
-						id="RROW-${hl.id}"
-						data-article-id="${hl.id}"
-						data-orig-feed-id="${hl.feed_id}"
-						data-orig-feed-title="${App.escapeHtml(hl.feed_title)}"
-						data-is-packed="1"
-						data-content="${App.escapeHtml(hl.content)}"
-						data-rendered-enclosures="${App.escapeHtml(Article.renderEnclosures(hl.enclosures))}"
-						data-score="${hl.score}"
-						data-article-title="${App.escapeHtml(hl.title)}"
-						onmouseover="Article.mouseIn(${hl.id})"
-						onmouseout="Article.mouseOut(${hl.id})">
-						<div class="header-sticky-guard"></div>
-						<div class="header">
-							<div class="left">
-								<span class="icon-feed source-icon" title="${App.escapeHtml(hl.feed_title)}" onclick="Feeds.open({feed:${hl.feed_id}})">
-									${Feeds.renderIcon(hl.feed_id, hl.has_icon)}
-								</span>
-							</div>
-
-							<span onclick="return Headlines.click(event, ${hl.id});" data-article-id="${hl.id}" class="titleWrap headline-main hlMenuAttach">
-								<span class="headline-meta">
-									<span class="feed-name">${App.escapeHtml(hl.feed_title)}</span>
-									<span class="relative-time" title="${App.escapeHtml(hl.updated_long)}">${relative_time}</span>
-								</span>
-								<span class="headline-title-line">
-									${App.getInitParam("debug_headline_ids") ? `<span class="text-muted small">A: ${hl.id} F: ${hl.feed_id}</span>` : ""}
-									<a class="title" title="${App.escapeHtml(hl.title)}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">
-										${hl.title}</a>
-									${Article.renderLabels(hl.id, hl.labels)}
-								</span>
-								${hl.cdm_excerpt ? `<span class="headline-preview">${hl.cdm_excerpt}</span>` : ""}
-							</span>
-
-							<a class="feed vfeedMenuAttach" style="background-color: ${hl.feed_bg_color}" data-feed-id="${hl.feed_id}"
-								title="${__('Open site')}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
-
-							<div class="right">
-								<i class="material-icons icon-grid-span" title="${__("Span all columns")}" onclick="Article.cdmToggleGridSpan(${hl.id})">fullscreen</i>
-							</div>
-
-						</div>
-
-						<div class="content" onclick="return Headlines.click(event, ${hl.id}, true);">
-							${Article.renderNote(hl.id, hl.note)}
-							<div class="content-inner" lang="${hl.lang ? App.escapeHtml(hl.lang) : 'en'}">
-								<div class="text-center text-muted">
-									${__("Loading, please wait...")}
-								</div>
-							</div>
-
-							<!-- intermediate: unstyled, kept for compatibility -->
-							<div class="intermediate"></div>
-
-							<div class="footer" onclick="event.stopPropagation()">
-
-								<div class="left">
-									${hl.buttons_left}
-									<i class="material-icons">label_outline</i>
-									${Article.renderTags(hl.id, hl.tags)}
-									<a title="${__("Edit tags for this article")}" href="#"
-										onclick="Article.editTags(${hl.id})">(+)</a>
-									${comments}
-								</div>
-
-								<div class="right">
-									${hl.buttons}
-								</div>
-							</div>
-						</div>
-					</div>`;
-
-
-		} else {
-			row = `<div class="hl ${row_class} ${Article.getScoreClass(hl.score)}"
+		row = `<div class="hl ${row_class} ${Article.getScoreClass(hl.score)}"
 				id="RROW-${hl.id}"
 				data-orig-feed-id="${hl.feed_id}"
 				data-orig-feed-title="${App.escapeHtml(hl.feed_title)}"
@@ -530,7 +319,6 @@ const Headlines = {
 			</div>
 			</div>
 		`;
-		}
 
 		const tmp = document.createElement("div");
 		tmp.innerHTML = row;
@@ -782,19 +570,6 @@ const Headlines = {
 				}
 			}
 
-			document.querySelectorAll('.cdm .header-sticky-guard').forEach((e) => {
-				this.sticky_header_observer.observe(e)
-			});
-
-			document.querySelectorAll('.cdm .content').forEach((e) => {
-				this.sticky_content_observer.observe(e)
-			});
-
-			if (App.getInitParam('cdm_expanded'))
-				document.querySelectorAll('#headlines-frame > div[id*=RROW].cdm').forEach((e) => {
-					this.unpack_observer.observe(e)
-				});
-
 		} else {
 			dijit.byId("headlines-frame").attr('content', "<div class='whiteBox'>" +
 				__('Could not update headlines (invalid object received - see error console for details)') +
@@ -822,9 +597,6 @@ const Headlines = {
 	},
 	move: function (mode, params = {}) {
 		const no_expand = params.no_expand || false;
-		const force_previous = params.force_previous || this.default_force_previous;
-		const force_to_top = params.force_to_top || this.default_force_to_top;
-
 		let prev_id = false;
 		let next_id = false;
 		let current_id = Article.getActive();
@@ -855,49 +627,11 @@ const Headlines = {
 
 		if (mode === "next") {
 			if (next_id) {
-				if (App.isCombinedMode()) {
-					window.requestAnimationFrame(() => {
-						Article.setActive(next_id);
-						Article.cdmMoveToId(next_id, {force_to_top: force_to_top});
-					});
-				} else {
-					Article.view(next_id, no_expand);
-				}
-			} else if (App.isCombinedMode()) {
-				// try to show hsp if no next article exists, in case there's useful information like first_id_changed etc
-				const row = document.getElementById(`RROW-${current_id}`);
-				const ctr = document.getElementById("headlines-frame");
-
-				if (row) {
-					const next = row.nextSibling;
-
-					// hsp has half-screen height in auto catchup mode therefore we use its first child (normally A element)
-					if (next && Element.visible(next) && next.id === "headlines-spacer" && next.firstChild) {
-						const offset = document.getElementById("headlines-spacer").offsetTop - document.getElementById("headlines-frame").offsetHeight + next.firstChild.offsetHeight;
-
-						// don't jump back either
-						if (ctr.scrollTop < offset)
-							ctr.scrollTop = offset;
-					}
-				}
+				Article.view(next_id, no_expand);
 			}
 		} else if (mode === "prev") {
 			if (prev_id || current_id) {
-				if (App.isCombinedMode()) {
-					window.requestAnimationFrame(() => {
-						const row = document.getElementById(`RROW-${current_id}`);
-						const ctr = document.getElementById("headlines-frame");
-						const delta_px = Math.round(row.offsetTop) - Math.round(ctr.scrollTop);
-
-						if (!force_previous && row && delta_px < -8) {
-							Article.setActive(current_id);
-							Article.cdmMoveToId(current_id, {force_to_top: force_to_top});
-						} else if (prev_id) {
-							Article.setActive(prev_id);
-							Article.cdmMoveToId(prev_id, {force_to_top: force_to_top});
-						}
-					});
-				} else if (prev_id) {
+				if (prev_id) {
 					Article.view(prev_id, no_expand);
 				}
 			}
@@ -1226,38 +960,5 @@ const Headlines = {
 			menu.startup();
 		}
 
-		/* vgroup feed title menu */
-
-		if (!dijit.byId("headlinesFeedTitleMenu")) {
-
-			const menu = new dijit.Menu({
-				id: "headlinesFeedTitleMenu",
-				targetNodeIds: ["headlines-frame"],
-				selector: "div.cdmFeedTitle"
-			});
-
-			menu.addChild(new dijit.MenuItem({
-				label: __("Mark group as read"),
-				onClick: function () {
-					Feeds.catchupFeedInGroup(this.getParent().currentTarget.getAttribute("data-feed-id"));
-				}
-			}));
-
-			menu.addChild(new dijit.MenuItem({
-				label: __("Mark feed as read"),
-				onClick: function () {
-					Feeds.catchupFeedInGroup(this.getParent().currentTarget.getAttribute("data-feed-id"));
-				}
-			}));
-
-			menu.addChild(new dijit.MenuItem({
-				label: __("Edit feed"),
-				onClick: function () {
-					CommonDialogs.editFeed(this.getParent().currentTarget.getAttribute("data-feed-id"));
-				}
-			}));
-
-			menu.startup();
-		}
 	}
 }

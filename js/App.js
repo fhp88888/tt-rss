@@ -303,27 +303,6 @@ const App = {
 		}
 
 	},
-		isCombinedMode: function() {
-			return false;
-		},
-		setCombinedMode: function() {
-			this.setInitParam("combined_display_mode", false);
-		},
-	isExpandedMode: function() {
-		return !!this.getInitParam("cdm_expanded");
-	},
-	setExpandedMode: function(expand) {
-		if (App.isCombinedMode()) {
-			const value = expand ? "true" : "false";
-
-			xhr.post("backend.php", {op: "RPC", method: "setpref", key: "CDM_EXPANDED", value: value}, () => {
-				this.setInitParam("cdm_expanded", !this.getInitParam("cdm_expanded"));
-				Headlines.renderAgain();
-			});
-		} else {
-			alert(__("This function is only available in combined mode."));
-		}
-	},
 	getActionByHotkeySequence: function(sequence) {
 		const hotkeys_map = this.getInitParam("hotkeys");
 
@@ -385,7 +364,7 @@ const App = {
 
 		// check for mode-specific hotkey
 		if (!action_name) {
-			hotkey_full = (this.isCombinedMode() ? "{C}" : "{3}") + hotkey_full;
+			hotkey_full = "{3}" + hotkey_full;
 
 			action_name = this.getActionByHotkeySequence(hotkey_full);
 		}
@@ -573,15 +552,6 @@ const App = {
             switch (k) {
                case "label_base_index":
                   this.LABEL_BASE_INDEX = parseInt(params[k]);
-                  break;
-               case "cdm_auto_catchup":
-                  {
-                     const headlines = document.getElementById("headlines-frame");
-
-                  // we could be in preferences
-                     if (headlines)
-                        headlines.setAttribute("data-auto-catchup", params[k] ? "true" : "false");
-                  }
                   break;
                case "hotkeys":
                   // filter mnemonic definitions (used for help panel) from hotkeys map
@@ -933,12 +903,7 @@ const App = {
 	isWideScreenMode: function() {
 		return !!this._widescreen_mode;
 	},
-   setWideScreenMode: function(wide, quiet = false) {
-
-		if (this.isCombinedMode() && !quiet) {
-			alert(__("Widescreen is not available in combined mode."));
-			return;
-		}
+   setWideScreenMode: function(wide) {
 
 		this._widescreen_mode = wide;
 
@@ -1036,17 +1001,11 @@ const App = {
 				if (feed !== false)
 					Feeds.open({feed: feed, is_cat: is_cat, delayed: true})
          };
-         this.hotkey_actions["next_article_or_scroll"] = (event) => {
-            if (this.isCombinedMode())
-               Headlines.scroll(Headlines.line_scroll_offset, event);
-            else
-               Headlines.move('next');
+         this.hotkey_actions["next_article_or_scroll"] = () => {
+            Headlines.move('next');
          };
-         this.hotkey_actions["prev_article_or_scroll"] = (event) => {
-            if (this.isCombinedMode())
-               Headlines.scroll(-Headlines.line_scroll_offset, event);
-            else
-               Headlines.move('prev');
+         this.hotkey_actions["prev_article_or_scroll"] = () => {
+            Headlines.move('prev');
          };
          this.hotkey_actions["next_article_noscroll"] = () => {
             Headlines.move('next');
@@ -1099,16 +1058,10 @@ const App = {
             Headlines.catchupRelativeTo(0);
          };
          this.hotkey_actions["article_scroll_down"] = (event) => {
-            if (this.isCombinedMode())
-               Headlines.scroll(Headlines.line_scroll_offset, event);
-            else
-               Article.scroll(Headlines.line_scroll_offset, event);
+            Article.scroll(Headlines.line_scroll_offset, event);
          };
          this.hotkey_actions["article_scroll_up"] = (event) => {
-            if (this.isCombinedMode())
-               Headlines.scroll(-Headlines.line_scroll_offset, event);
-            else
-               Article.scroll(-Headlines.line_scroll_offset, event);
+            Article.scroll(-Headlines.line_scroll_offset, event);
          };
          this.hotkey_actions["next_headlines_page"] = (event) => {
             Headlines.scrollByPages(1, event);
@@ -1117,23 +1070,13 @@ const App = {
             Headlines.scrollByPages(-1, event);
          };
          this.hotkey_actions["article_page_down"] = (event) => {
-            if (this.isCombinedMode())
-               Headlines.scrollByPages(1, event);
-            else
-               Article.scrollByPages(1, event);
+            Article.scrollByPages(1, event);
          };
          this.hotkey_actions["article_page_up"] = (event) => {
-            if (this.isCombinedMode())
-               Headlines.scrollByPages(-1, event);
-            else
-               Article.scrollByPages(-1, event);
+            Article.scrollByPages(-1, event);
          };
          this.hotkey_actions["close_article"] = () => {
-            if (this.isCombinedMode()) {
-               Article.cdmUnsetActive();
-            } else {
-               Article.close();
-            }
+            Article.close();
          };
          this.hotkey_actions["email_article"] = () => {
             if (typeof Plugins.Mail !== "undefined") {
@@ -1193,12 +1136,6 @@ const App = {
             if (typeof Feeds.getActive() !== "undefined") {
                Feeds.catchupCurrent();
             }
-         };
-         this.hotkey_actions["feed_toggle_grid"] = () => {
-            xhr.json("backend.php", {op: "RPC", method: "togglepref", key: "CDM_ENABLE_GRID"}, (reply) => {
-               App.setInitParam("cdm_enable_grid", reply.value);
-               Headlines.renderAgain();
-            })
          };
          this.hotkey_actions["feed_toggle_vgroup"] = () => {
             xhr.post("backend.php", {op: "RPC", method: "togglepref", key: "VFEED_GROUP_BY_FEED"}, () => {

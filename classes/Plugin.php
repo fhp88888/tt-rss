@@ -222,17 +222,6 @@ abstract class Plugin {
 		return [];
 	}
 
-	/** Invoked when article is rendered by backend (before it gets passed to frontent JS code) - combined mode
-	 * @param array<string, mixed> $article
-	 * @return array<string, mixed>
-	 * @see PluginHost::HOOK_RENDER_ARTICLE_CDM
-	 */
-	function hook_render_article_cdm($article) {
-		user_error("Dummy method invoked.", E_USER_ERROR);
-
-		return [];
-	}
-
 	/** Invoked when raw feed XML data has been successfully downloaded (but not parsed yet)
 	 * @param string $feed_data
 	 * @param string $fetch_url

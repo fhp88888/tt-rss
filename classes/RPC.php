@@ -43,10 +43,6 @@ class RPC extends Handler_Protected {
 		function togglepref(): void {
 			$key = clean($_REQUEST["key"]);
 			$profile = $_SESSION['profile'] ?? null;
-			if (in_array($key, [Prefs::COMBINED_DISPLAY_MODE, Prefs::CDM_EXPANDED, Prefs::CDM_ENABLE_GRID])) {
-				print json_encode(["param" => $key, "value" => false]);
-				return;
-			}
 
 			Prefs::set($key, !Prefs::get($key, $_SESSION['uid'], $profile), $_SESSION['uid'], $profile);
 			$value = Prefs::get($key, $_SESSION['uid'], $profile);
@@ -58,10 +54,6 @@ class RPC extends Handler_Protected {
 			// set_pref escapes input, so no need to double escape it here
 			$key = clean($_REQUEST['key']);
 			$value = $_REQUEST['value'];
-			if (in_array($key, [Prefs::COMBINED_DISPLAY_MODE, Prefs::CDM_EXPANDED, Prefs::CDM_ENABLE_GRID])) {
-				print json_encode(["param" =>$key, "value" => false]);
-				return;
-			}
 
 			Prefs::set($key, $value, $_SESSION['uid'], $_SESSION['profile'] ?? null, $key != 'USER_STYLESHEET');
 
@@ -352,15 +344,12 @@ class RPC extends Handler_Protected {
 
 			foreach ([Prefs::ON_CATCHUP_SHOW_NEXT_FEED, Prefs::HIDE_READ_FEEDS,
 				Prefs::ENABLE_FEED_CATS, Prefs::FEEDS_SORT_BY_UNREAD,
-				Prefs::CONFIRM_FEED_CATCHUP,  Prefs::CDM_AUTO_CATCHUP,
+				Prefs::CONFIRM_FEED_CATCHUP,
 				Prefs::FRESH_ARTICLE_MAX_AGE, Prefs::RECENTLY_READ_MAX_AGE, Prefs::HIDE_READ_SHOWS_SPECIAL,
 				Prefs::DEBUG_HEADLINE_IDS] as $param) {
 
 				$params[strtolower($param)] = (int) Prefs::get($param, $_SESSION['uid'], $profile);
 			}
-
-			$params["combined_display_mode"] = 0;
-			$params["cdm_enable_grid"] = 0;
 
 		$params["safe_mode"] = !empty($_SESSION["safe_mode"]);
 		$params["check_for_updates"] = Config::get(Config::CHECK_FOR_UPDATES);
@@ -434,7 +423,6 @@ class RPC extends Handler_Protected {
 		$data = [
 			'max_feed_id' => (int) $max_feed_id,
 			'num_feeds' => (int) $num_feeds,
-			'cdm_expanded' => Prefs::get(Prefs::CDM_EXPANDED, $_SESSION['uid'], $_SESSION['profile'] ?? null),
 			'labels' => Labels::get_all($_SESSION["uid"]),
 		];
 
@@ -494,8 +482,8 @@ class RPC extends Handler_Protected {
 				"next_unread_feed" => __("Open next unread feed"),
 				"prev_feed" => __("Open previous feed"),
 				"prev_unread_feed" => __("Open previous unread feed"),
-				"next_article_or_scroll" => __("Open next article (in combined mode, scroll down)"),
-				"prev_article_or_scroll" => __("Open previous article (in combined mode, scroll up)"),
+				"next_article_or_scroll" => __("Open next article"),
+				"prev_article_or_scroll" => __("Open previous article"),
 				"next_headlines_page" => __("Scroll headlines by one page down"),
 				"prev_headlines_page" => __("Scroll headlines by one page up"),
 				"next_article_noscroll" => __("Open next article"),
@@ -527,7 +515,6 @@ class RPC extends Handler_Protected {
 				"feed_edit" => __("Edit feed"),
 				"feed_catchup" => __("Mark as read"),
 				"feed_toggle_vgroup" => __("Toggle headline grouping"),
-				"feed_toggle_grid" => __("Toggle grid view"),
 				"feed_debug_update" => __("Debug feed update"),
 					"feed_debug_viewfeed" => __("Debug viewfeed()"),
 					"catchup_all" => __("Mark all feeds as read"),
@@ -597,7 +584,6 @@ class RPC extends Handler_Protected {
 			"f e" => "feed_edit",
 			"f q" => "feed_catchup",
 			"f g" => "feed_toggle_vgroup",
-			"f G" => "feed_toggle_grid",
 			"f D" => "feed_debug_update",
 				"f %" => "feed_debug_viewfeed",
 			"Q" => "catchup_all",

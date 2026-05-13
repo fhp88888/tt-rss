@@ -50,28 +50,6 @@ const Article = {
 			}
 		}
 	},
-	cdmToggleGridSpan: function(id) {
-		const row = document.getElementById(`RROW-${id}`);
-
-		if (row) {
-			row.classList.toggle('grid-span-row');
-
-			this.setActive(id);
-			this.cdmMoveToId(id);
-		}
-	},
-	cdmUnsetActive: function (event) {
-		const row = document.getElementById(`RROW-${Article.getActive()}`);
-
-		if (row) {
-			row.classList.remove('active');
-
-			if (event)
-				event.stopPropagation();
-
-			return false;
-		}
-	},
 	close: function () {
 		if (dijit.byId("content-insert"))
 			dijit.byId("headlines-wrap-inner").removeChild(
@@ -233,13 +211,8 @@ const Article = {
 			if (container.textContent.length === 0)
 				container.innerHTML += "&nbsp;";
 
-			// in expandable mode, save content for later, so that we can pack unfocused rows back
-			if (App.isCombinedMode() && document.getElementById('main').classList.contains('expandable'))
-				row.setAttribute("data-content-original", row.getAttribute("data-content"));
-
 			row.setAttribute("data-is-packed", "0");
 
-			PluginHost.run(PluginHost.HOOK_ARTICLE_RENDERED_CDM, row);
 		}
 	},
 	pack: function(row) {
@@ -387,27 +360,11 @@ const Article = {
 		dialog.show();
 
 	},
-	cdmMoveToId: function (id, params = {}) {
-		const force_to_top = params.force_to_top || false;
-
-		const ctr = document.getElementById("headlines-frame");
-		const row = document.getElementById(`RROW-${id}`);
-
-		if (ctr && row) {
-			const grid_gap = parseInt(window.getComputedStyle(ctr).gridGap) || 0;
-
-			if (force_to_top || !App.Scrollable.fitsInContainer(row, ctr)) {
-				ctr.scrollTop = row.offsetTop - grid_gap;
-			}
-		}
-	},
 	setActive: function (id) {
 		if (id !== Article.getActive()) {
 			document.querySelectorAll('div[id*=RROW][class*=active]').forEach((row) => {
 				row.classList.remove('active');
 
-				if (App.isCombinedMode() && !App.getInitParam("cdm_expanded"))
-					Article.pack(row);
 			});
 
 			const row = document.getElementById(`RROW-${id}`);

@@ -15,7 +15,6 @@ class NSFW extends Plugin {
 		$this->host = $host;
 
 		$host->add_hook(PluginHost::HOOK_RENDER_ARTICLE, $this);
-		$host->add_hook(PluginHost::HOOK_RENDER_ARTICLE_CDM, $this);
 		$host->add_hook(PluginHost::HOOK_RENDER_ARTICLE_API, $this);
 		$host->add_hook(PluginHost::HOOK_ARTICLE_IMAGE, $this);
 		$host->add_hook(PluginHost::HOOK_PREFS_TAB, $this);
@@ -63,10 +62,6 @@ class NSFW extends Plugin {
 	}
 
 	function hook_render_article($article) {
-		return $this->rewrite_contents($article);
-	}
-
-	function hook_render_article_cdm($article) {
 		return $this->rewrite_contents($article);
 	}
 
@@ -121,4 +116,3 @@ class NSFW extends Plugin {
 		return 2;
 	}
 }
-

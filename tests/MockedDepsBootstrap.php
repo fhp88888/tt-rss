@@ -52,7 +52,6 @@ if (!class_exists('PluginHost')) {
 		const HOOK_AUTH_USER = 10;
 		const HOOK_HOTKEY_MAP = 11;
 		const HOOK_RENDER_ARTICLE = 12;
-		const HOOK_RENDER_ARTICLE_CDM = 13;
 		const HOOK_FEED_FETCHED = 14;
 		const HOOK_RENDER_ARTICLE_API = 16;
 		const HOOK_TOOLBAR_BUTTON = 17;
@@ -75,7 +74,6 @@ if (!class_exists('PluginHost')) {
 		const HOOK_MAIN_TOOLBAR_BUTTON = 34;
 		const HOOK_ENCLOSURE_ENTRY = 35;
 		const HOOK_FORMAT_ARTICLE = 36;
-		const HOOK_FORMAT_ARTICLE_CDM = 37;
 		const HOOK_FEED_BASIC_INFO = 38;
 		const HOOK_SEND_LOCAL_FILE = 39;
 		const HOOK_UNSUBSCRIBE_FEED = 40;

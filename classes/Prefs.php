@@ -10,14 +10,12 @@ class Prefs {
 	const SHOW_CONTENT_PREVIEW = "SHOW_CONTENT_PREVIEW";
 	const SHORT_DATE_FORMAT = "SHORT_DATE_FORMAT";
 	const LONG_DATE_FORMAT = "LONG_DATE_FORMAT";
-	const COMBINED_DISPLAY_MODE = "COMBINED_DISPLAY_MODE";
 	const HIDE_READ_FEEDS = "HIDE_READ_FEEDS";
 	const ON_CATCHUP_SHOW_NEXT_FEED = "ON_CATCHUP_SHOW_NEXT_FEED";
 	const FEEDS_SORT_BY_UNREAD = "FEEDS_SORT_BY_UNREAD";
 	const REVERSE_HEADLINES = "REVERSE_HEADLINES";
 	const DIGEST_ENABLE = "DIGEST_ENABLE";
 	const CONFIRM_FEED_CATCHUP = "CONFIRM_FEED_CATCHUP";
-	const CDM_AUTO_CATCHUP = "CDM_AUTO_CATCHUP";
 	const _DEFAULT_VIEW_MODE = "_DEFAULT_VIEW_MODE";
 	const _DEFAULT_VIEW_LIMIT = "_DEFAULT_VIEW_LIMIT";
 	//const _PREFS_ACTIVE_TAB = "_PREFS_ACTIVE_TAB";
@@ -26,7 +24,6 @@ class Prefs {
 	const FRESH_ARTICLE_MAX_AGE = "FRESH_ARTICLE_MAX_AGE";
 	const RECENTLY_READ_MAX_AGE = 'RECENTLY_READ_MAX_AGE';
 	const DIGEST_CATCHUP = "DIGEST_CATCHUP";
-	const CDM_EXPANDED = "CDM_EXPANDED";
 	const PURGE_UNREAD_ARTICLES = "PURGE_UNREAD_ARTICLES";
 	const HIDE_READ_SHOWS_SPECIAL = "HIDE_READ_SHOWS_SPECIAL";
 	const VFEED_GROUP_BY_FEED = "VFEED_GROUP_BY_FEED";
@@ -61,7 +58,6 @@ class Prefs {
 	const DEBUG_HEADLINE_IDS = "DEBUG_HEADLINE_IDS";
 	const DISABLE_CONDITIONAL_COUNTERS = "DISABLE_CONDITIONAL_COUNTERS";
 	const WIDESCREEN_MODE = "WIDESCREEN_MODE";
-	const CDM_ENABLE_GRID = "CDM_ENABLE_GRID";
 	const DIGEST_MIN_SCORE = "DIGEST_MIN_SCORE";
 	const AI_SUMMARIES_ENABLED = "AI_SUMMARIES_ENABLED";
 	const AI_ENDPOINT = "AI_ENDPOINT";
@@ -79,14 +75,12 @@ class Prefs {
 		Prefs::SHOW_CONTENT_PREVIEW => [ true, Config::T_BOOL ],
 		Prefs::SHORT_DATE_FORMAT => [ "M d, G:i", Config::T_STRING ],
 		Prefs::LONG_DATE_FORMAT => [ "D, M d Y - G:i", Config::T_STRING ],
-			Prefs::COMBINED_DISPLAY_MODE => [ false, Config::T_BOOL ],
 		Prefs::HIDE_READ_FEEDS => [ false, Config::T_BOOL ],
 		Prefs::ON_CATCHUP_SHOW_NEXT_FEED => [ false, Config::T_BOOL ],
 		Prefs::FEEDS_SORT_BY_UNREAD => [ false, Config::T_BOOL ],
 		Prefs::REVERSE_HEADLINES => [ false, Config::T_BOOL ],
 		Prefs::DIGEST_ENABLE => [ false, Config::T_BOOL ],
 		Prefs::CONFIRM_FEED_CATCHUP => [ true, Config::T_BOOL ],
-		Prefs::CDM_AUTO_CATCHUP => [ false, Config::T_BOOL ],
 		Prefs::_DEFAULT_VIEW_MODE => [ "adaptive", Config::T_STRING ],
 		Prefs::_DEFAULT_VIEW_LIMIT => [ 30, Config::T_INT ],
 		//Prefs::_PREFS_ACTIVE_TAB => [ "", Config::T_STRING ],
@@ -95,7 +89,6 @@ class Prefs {
 		Prefs::FRESH_ARTICLE_MAX_AGE => [ 24, Config::T_INT ],
 		Prefs::RECENTLY_READ_MAX_AGE => [ 24, Config::T_INT ],
 		Prefs::DIGEST_CATCHUP => [ false, Config::T_BOOL ],
-		Prefs::CDM_EXPANDED => [ true, Config::T_BOOL ],
 		Prefs::PURGE_UNREAD_ARTICLES => [ true, Config::T_BOOL ],
 		Prefs::HIDE_READ_SHOWS_SPECIAL => [ true, Config::T_BOOL ],
 		Prefs::VFEED_GROUP_BY_FEED => [ false, Config::T_BOOL ],
@@ -130,7 +123,6 @@ class Prefs {
 		Prefs::DEBUG_HEADLINE_IDS => [ false, Config::T_BOOL ],
 		Prefs::DISABLE_CONDITIONAL_COUNTERS => [ false, Config::T_BOOL ],
 		Prefs::WIDESCREEN_MODE => [ false, Config::T_BOOL ],
-		Prefs::CDM_ENABLE_GRID => [ false, Config::T_BOOL ],
 		Prefs::DIGEST_MIN_SCORE => [ 0, Config::T_INT ],
 		Prefs::AI_SUMMARIES_ENABLED => [ false, Config::T_BOOL ],
 		Prefs::AI_ENDPOINT => [ "https://api.openai.com/v1/chat/completions", Config::T_STRING ],

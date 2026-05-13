@@ -309,16 +309,6 @@ class Feeds extends Handler_Protected {
 				$line["content"] = Sanitizer::sanitize($line["content"],
 					$line['hide_images'], null, $line["site_url"], $highlight_words, $line["id"]);
 
-				if (!Prefs::get(Prefs::CDM_EXPANDED, $_SESSION['uid'], $profile)) {
-					$line["cdm_excerpt"] = "<span class='collapse'>
-						<i class='material-icons' onclick='return Article.cdmUnsetActive(event)'
-								title=\"" . __("Collapse article") . "\">remove_circle</i></span>";
-
-					if (Prefs::get(Prefs::SHOW_CONTENT_PREVIEW, $_SESSION['uid'], $profile)) {
-						$line["cdm_excerpt"] .= "<span class='excerpt'>" . $line["content_preview"] . "</span>";
-					}
-				}
-
 				if ($line["num_enclosures"] > 0) {
 					$line["enclosures"] = Article::_format_enclosures($id,
 						sql_bool_to_bool($line["always_display_enclosures"]),
@@ -351,12 +341,6 @@ class Feeds extends Handler_Protected {
 				}
 
 				$line['feed_bg_color'] = 'rgba(' . implode(',', $rgba_cache[$feed_id]) . ',0.3)';
-
-				PluginHost::getInstance()->chain_hooks_callback(PluginHost::HOOK_RENDER_ARTICLE_CDM,
-					function ($result, $plugin) use (&$line) {
-						$line = $result;
-					},
-					$line);
 
 				$line['content'] = DiskCache::rewrite_urls($line['content']);
 
@@ -514,7 +498,7 @@ class Feeds extends Handler_Protected {
 			'disable_cache' => (bool) $disable_cache,
 		];
 
-		// this is parsed by handleRpcJson() on first viewfeed() to set cdm expanded, etc
+		// this is parsed by handleRpcJson() on first viewfeed() to set runtime state.
 		$reply['runtime-info'] = RPC::_make_runtime_info();
 
 		if (!empty($_REQUEST["debug"])) {

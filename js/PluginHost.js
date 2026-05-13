@@ -4,7 +4,6 @@
 /* exported PluginHost */
 const PluginHost = {
 	HOOK_ARTICLE_RENDERED: 1,
-	HOOK_ARTICLE_RENDERED_CDM: 2,
 	HOOK_ARTICLE_SET_ACTIVE: 3,
 	HOOK_FEED_SET_ACTIVE: 4,
 	HOOK_FEED_LOADED: 5,
@@ -56,8 +55,4 @@ const PluginHost = {
 };
 
 /* PluginHost.register(PluginHost.HOOK_ARTICLE_RENDERED,
-		function (args) { console.log('ARTICLE_RENDERED: ' + args); return true; });
-
-PluginHost.register(PluginHost.HOOK_ARTICLE_RENDERED_CDM,
-		function (args) { console.log('ARTICLE_RENDERED_CDM: ' + args); return true; }); */
-
+		function (args) { console.log('ARTICLE_RENDERED: ' + args); return true; }); */
