@@ -42,18 +42,15 @@ prepare_data_dirs() {
 		data/templates.local \
 		data/themes.local
 
-	run touch data/config.php
-	run ln -sfn data/config.php config.php
+	run rm -f config.php
+	run chown "$OWNER_UID:$OWNER_GID" .
 
 	run chown -R "$OWNER_UID:$OWNER_GID" \
 		data/cache \
 		data/lock \
 		data/plugins.local \
 		data/templates.local \
-		data/themes.local \
-		data/config.php
-
-	run chmod 644 data/config.php
+		data/themes.local
 }
 
 if [[ "${1:-}" == "--dry-run" ]]; then
