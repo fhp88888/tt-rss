@@ -54,14 +54,13 @@ First deployment:
 ```bash
 cp .env-dist .env
 # edit .env, especially TTRSS_SELF_URL_PATH and HTTP_PORT
-docker compose up -d
+./deploy.sh up
 ```
 
 Update deployed application code:
 
 ```bash
-git pull
-docker compose restart app updater web-nginx
+./deploy.sh update
 ```
 
 Rebuilds are not required for PHP, JavaScript, CSS, or template changes because
@@ -71,7 +70,7 @@ packages:
 
 ```bash
 docker compose pull
-docker compose up -d
+./deploy.sh up
 ```
 
 ## License
