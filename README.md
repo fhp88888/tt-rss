@@ -1,69 +1,123 @@
-Tiny Tiny RSS (tt-rss)
-======================
+Customized Tiny Tiny RSS Fork
+=============================
 
-Tiny Tiny RSS (tt-rss) is a free, flexible, open-source, web-based news feed (RSS/Atom/other) reader and aggregator.
+This repository is a customized Tiny Tiny RSS fork. It keeps the upstream tt-rss
+reader as the base, while adding local workflow, deployment, UI, and RSS Gallery
+changes for this project.
 
-## Getting started
+The main branch is the active development branch for this checkout.
 
-Please refer to [the installation guide](https://tt-rss.org/docs/Installation-Guide.html).
+## What is included
 
-## Some notes about this project
+This fork currently includes:
 
-* The original tt-rss project, hosted at https://tt-rss.org/ and its various subdomains, was retired on 2025-11-01.
-  * Massive thanks to fox for creating tt-rss, and maintaining it (and absolutely everything else that went along with it) for so many years.
-* This project (https://github.com/tt-rss/tt-rss) is a fork of tt-rss as of 2025-10-03, created by one of its long-time contributors (`wn_`/`wn_name` on `tt-rss.org`, `supahgreg` on `github.com`).
-  * The goal is (as you might expect) to continue tt-rss development.
-  * No major breaking changes are planned.
-  * Like the original project:
-    * The minimum PHP version supported by tt-rss will match [what's in Debian's current `stable` release](https://packages.debian.org/stable/php).
-    * What's on the `main` branch (or `latest` and the most recent `sha-*` tag for the Docker images) is intended to be stable
-      and safe for use.  Like all software, however, bugs sometimes slip through; the goal is to address those bugs promptly.
-    * Using the latest code/image is strongly encouraged, and may be a prerequisite to getting support in certain situations.
-  * Developer note: Due to use of `invalid@email.com` on `supahgreg`'s pre-2025-10-03 commits (which were done on `tt-rss.org`) GitHub incorrectly shows `ivanivanov884`
-    (the GitHub user associated with that e-mail address) as the author instead of `wn_`/`supahgreg`.  Apologies for any confusion.  `¯\_(ツ)_/¯`
-* Docker images (for `linux/amd64` and `linux/arm64`; drop-in replacements for the old images;
-  see [the installation guide](https://tt-rss.org/docs/Installation-Guide.html)) are being built and published
-  ([via GitHub Actions](https://github.com/tt-rss/tt-rss/actions/workflows/publish.yml)) to:
-  * Docker Hub (as [supahgreg/tt-rss](https://hub.docker.com/r/supahgreg/tt-rss/) and [supahgreg/tt-rss-web-nginx](https://hub.docker.com/r/supahgreg/tt-rss-web-nginx/)).
-  * GitHub Container Registry (as [ghcr.io/tt-rss/tt-rss](https://github.com/orgs/tt-rss/packages/container/package/tt-rss)
-    and [ghcr.io/tt-rss/tt-rss-web-nginx](https://github.com/orgs/tt-rss/packages/container/package/tt-rss-web-nginx)).
-* Documentation from https://tt-rss.org has been recreated in https://github.com/tt-rss/tt-rss.github.io,
-  which is the new source for https://tt-rss.org content.
-  * The original project's repository that held content for https://tt-rss.org was mirrored to https://github.com/tt-rss/tt-rss-web-static .
-    Some content tweaks were made after mirroring (prior to the new repository being set up), and the repository is now archived.
-* Plugins that were under https://gitlab.tt-rss.org/tt-rss/plugins have been mirrored to `https://github.com/tt-rss/tt-rss-plugin-*`.
-  * Plugin repository names have changed to get a consistent `tt-rss-plugin-*` prefix.
+* A Docker-first development preview stack.
+* A deploy stack that bind-mounts this checkout into prebuilt tt-rss runtime
+  images.
+* Headline list article thumbnails.
+* RSS Gallery feed discovery data and UI.
+* Local deployment helpers that keep runtime data under `data/`.
 
-## Development and contributing
+## Local development preview
 
-Contributions (code, translations, reporting issues, etc.) are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
+Use Docker for the runtime. Do not install PHP, Composer, PostgreSQL, nginx, or
+other tt-rss runtime services on the host unless you intentionally want a custom
+host setup.
 
-## Docker deployment in this fork
+Start the preview stack:
 
-This checkout keeps two Docker Compose entry points:
+```bash
+docker compose -f docker-compose.dev.yml up -d
+```
 
-* `docker-compose.dev.yml` is the local development preview stack.
-* `docker-compose.yml` is the deploy stack.
+Open:
 
-The deploy stack uses prebuilt tt-rss runtime images and bind-mounts this Git
-checkout into the containers. Docker provides PHP-FPM, nginx, PostgreSQL, and
-the updater process; application code stays in Git on the host.
+```text
+http://127.0.0.1:8280/tt-rss/
+```
 
-Runtime data is kept under `data/`:
+Default development login:
 
-* `data/postgres` stores PostgreSQL data.
-* `data/cache` and `data/lock` store tt-rss runtime files.
-* `data/plugins.local`, `data/templates.local`, and `data/themes.local` store
-  local customizations.
+```text
+user: admin
+pass: password
+```
 
-`./deploy.sh` creates the runtime directories and assigns them to `OWNER_UID`
-and `OWNER_GID`, both defaulting to `1000`. It also grants the app group write
-access to the checkout root so the container can generate the ignored
-root-level `config.php` required by the upstream image startup script.
+Stop the preview stack:
 
-The deploy compose hides the host `data/` directory inside app containers so
-the upstream startup script cannot recursively change ownership of PostgreSQL
-files.
+```bash
+docker compose -f docker-compose.dev.yml down
+```
+
+The dev stack bind-mounts the repository into the app and web containers, so
+PHP, JavaScript, CSS, theme, template, and data file changes are visible after a
+browser refresh. Rebuild images only for Dockerfile, system package, or PHP
+extension changes.
+
+Useful checks:
+
+```bash
+docker compose -f docker-compose.dev.yml config
+curl -s http://127.0.0.1:8280/tt-rss/
+npm run lint:js
+npm run lint:css
+```
+
+PHP tests are configured by `phpunit.xml`; run them inside an environment with
+the project PHP dependencies available.
+
+## Development workflow
+
+The normal workflow for this project is:
+
+1. Make changes in this host checkout.
+2. Run or refresh the Docker preview stack.
+3. Verify the changed page or behavior.
+4. Commit after the preview is accepted.
+5. Push to `origin/main` when ready.
+
+Before committing or pushing, check that local data is not staged:
+
+```bash
+git status --short --branch
+git diff --stat
+git diff --cached --stat
+```
+
+Do not commit OPML exports, feed backups, `.env`, credentials, database dumps,
+cache files, logs, session data, or OS/editor metadata.
+
+## RSS Gallery
+
+RSS Gallery feed data lives in:
+
+```text
+data/rss-gallery.csv
+```
+
+The CSV format is:
+
+```csv
+title,url
+Example Feed,https://example.com/feed.xml
+```
+
+Keep the file in Git when feed recommendations change. Invalid or incomplete
+rows are skipped by the RSS Gallery reader, but committed rows should still have
+a useful title and a valid feed URL.
+
+Related files:
+
+* `classes/RssGallery.php`
+* `classes/Rss_Gallery.php`
+* `tests/RssGalleryTest.php`
+* `themes/rss-gallery.css`
+
+## Deployment
+
+The deploy stack is defined by `docker-compose.yml` and managed by `deploy.sh`.
+Docker provides PostgreSQL, PHP-FPM, nginx, and the updater process. The source
+tree stays on the host and is bind-mounted into the containers.
 
 First deployment:
 
@@ -73,21 +127,66 @@ cp .env-dist .env
 ./deploy.sh up
 ```
 
+Common deploy commands:
+
+```bash
+./deploy.sh up
+./deploy.sh restart
+./deploy.sh down
+```
+
+Runtime data is kept under `data/`:
+
+* `data/postgres` stores PostgreSQL data.
+* `data/cache` and `data/lock` store tt-rss runtime files.
+* `data/plugins.local`, `data/templates.local`, and `data/themes.local` store
+  local customizations.
+
+`deploy.sh` creates runtime directories and assigns them to `OWNER_UID` and
+`OWNER_GID`, both defaulting to `1000`. It also grants the app group write
+access to the checkout root so the container can generate the ignored
+root-level `config.php` required by the upstream image startup script.
+
+The deploy compose hides the host `data/` directory inside app containers so the
+upstream startup script cannot recursively change ownership of PostgreSQL files.
+
+## Updating
+
 Update deployed application code:
 
 ```bash
 ./deploy.sh update
 ```
 
-Rebuilds are not required for PHP, JavaScript, CSS, or template changes because
-the source tree is mounted from the host. Pull newer runtime images only when
-you want updated image contents or an upstream change requires new runtime
-packages:
+That command prepares runtime directories, runs `git pull --ff-only`, and
+restarts the app, updater, and web services.
+
+PHP, JavaScript, CSS, template, and CSV changes do not require image rebuilds
+because the checkout is bind-mounted from the host.
+
+Pull newer runtime images only when you want updated image contents or when an
+upstream/runtime change requires new system packages or PHP extensions:
 
 ```bash
 docker compose pull
 ./deploy.sh up
 ```
+
+## Upstream Tiny Tiny RSS
+
+Tiny Tiny RSS is a free, flexible, open-source, web-based news feed
+(RSS/Atom/other) reader and aggregator.
+
+The original tt-rss project at `tt-rss.org` was retired on 2025-11-01. Current
+upstream continuation work lives at:
+
+* https://github.com/tt-rss/tt-rss
+* https://tt-rss.org/
+
+This repository is a customized fork of that codebase. For general upstream
+installation and project background, see the upstream documentation:
+
+* https://tt-rss.org/docs/Installation-Guide.html
 
 ## License
 
@@ -98,10 +197,10 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 Copyright (c) 2005 Andrew Dolgov (unless explicitly stated otherwise).
