@@ -149,6 +149,8 @@ root-level `config.php` required by the upstream image startup script.
 
 The deploy compose hides the host `data/` directory inside app containers so the
 upstream startup script cannot recursively change ownership of PostgreSQL files.
+The tracked `data/rss-gallery.csv` file is mounted back into that hidden
+container path read-only so RSS Gallery can load the committed feed list.
 
 ## Updating
 
