@@ -43,6 +43,7 @@ prepare_data_dirs() {
 		data/themes.local
 
 	run touch data/config.php
+	run ln -sfn data/config.php config.php
 
 	run chown -R "$OWNER_UID:$OWNER_GID" \
 		data/cache \

@@ -55,7 +55,8 @@ Runtime data is kept under `data/`:
 * `data/cache` and `data/lock` store tt-rss runtime files.
 * `data/plugins.local`, `data/templates.local`, and `data/themes.local` store
   local customizations.
-* `data/config.php` stores the generated Docker runtime configuration.
+* `data/config.php` stores the generated Docker runtime configuration through
+  the ignored root-level `config.php` symlink created by `./deploy.sh`.
 
 `./deploy.sh` creates the runtime directories and assigns them to `OWNER_UID`
 and `OWNER_GID`, both defaulting to `1000`.

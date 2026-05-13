@@ -36,7 +36,6 @@ services:
       - ./data/plugins.local:/var/www/html/tt-rss/plugins.local
       - ./data/templates.local:/var/www/html/tt-rss/templates.local
       - ./data/themes.local:/var/www/html/tt-rss/themes.local
-      - ./data/config.php:/var/www/html/tt-rss/config.php
     depends_on:
       - db
 
@@ -57,7 +56,6 @@ services:
       - ./data/plugins.local:/var/www/html/tt-rss/plugins.local
       - ./data/templates.local:/var/www/html/tt-rss/templates.local
       - ./data/themes.local:/var/www/html/tt-rss/themes.local
-      - ./data/config.php:/var/www/html/tt-rss/config.php
     depends_on:
       - app
     command: /opt/tt-rss/updater.sh
@@ -75,6 +73,5 @@ services:
       - ./data/plugins.local:/var/www/html/tt-rss/plugins.local:ro
       - ./data/templates.local:/var/www/html/tt-rss/templates.local:ro
       - ./data/themes.local:/var/www/html/tt-rss/themes.local:ro
-      - ./data/config.php:/var/www/html/tt-rss/config.php:ro
     depends_on:
       - app
