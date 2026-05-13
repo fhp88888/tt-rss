@@ -23,6 +23,8 @@
 		}
 	} ?>
 
+	<?= stylesheet_tag("themes/rss-gallery.css") ?>
+
 	<?= Config::get_override_links() ?>
 
 	<script type="text/javascript">
@@ -226,6 +228,7 @@
 								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcFilterFeeds')"><?= __('Search feeds...') ?></div>
 								<div dojoType="dijit.MenuItem" disabled="1"><?= __('Feed actions:') ?></div>
 								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcAddFeed')"><?= __('Subscribe to feed...') ?></div>
+								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcRssGallery')"><?= __('RSS Gallery') ?></div>
 								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcEditFeed')"><?= __('Edit this feed...') ?></div>
 								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcRemoveFeed')"><?= __('Unsubscribe') ?></div>
 								<div dojoType="dijit.MenuItem" disabled="1"><?= __('All feeds:') ?></div>

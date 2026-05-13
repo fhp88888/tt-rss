@@ -1,0 +1,220 @@
+#rssGalleryDlg {
+  width: calc(100vw - 96px);
+  max-width: 1440px;
+}
+
+#rssGalleryDlg .dijitDialogPaneContent {
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+}
+
+#rssGalleryDlg .dijitDialogPaneContentArea {
+  overflow: hidden;
+}
+
+body.ttrss_main .rss-gallery {
+  display: grid;
+  box-sizing: border-box;
+  grid-template-columns: 280px minmax(0, 1fr);
+  width: 100%;
+  height: min(600px, calc(100vh - 180px));
+  min-height: 420px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+body.ttrss_main .rss-gallery-list-pane,
+body.ttrss_main .rss-gallery-preview-pane {
+  min-width: 0;
+  min-height: 0;
+}
+
+body.ttrss_main .rss-gallery-list-pane {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ddd;
+  background: #f7f7f7;
+}
+
+body.ttrss_main .rss-gallery-search {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+body.ttrss_main .rss-gallery-search-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: #fff;
+}
+
+body.ttrss_main .rss-gallery-feed-list {
+  overflow: auto;
+  min-height: 0;
+}
+
+body.ttrss_main .rss-gallery-feed {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 1px solid #e2e2e2;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+body.ttrss_main .rss-gallery-feed:hover,
+body.ttrss_main .rss-gallery-feed.selected {
+  background: #e8eef7;
+}
+
+body.ttrss_main .rss-gallery-feed-title,
+body.ttrss_main .rss-gallery-feed-url {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.ttrss_main .rss-gallery-feed-title {
+  color: #333;
+  font-weight: 600;
+}
+
+body.ttrss_main .rss-gallery-feed-url {
+  margin-top: 3px;
+  color: #777;
+  font-size: 11px;
+}
+
+body.ttrss_main .rss-gallery-preview-pane {
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  background: #fff;
+}
+
+body.ttrss_main .rss-gallery-preview-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+body.ttrss_main .rss-gallery-preview-title {
+  overflow: hidden;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.ttrss_main .rss-gallery-subscribe {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+}
+
+body.ttrss_main .rss-gallery-subscribe .material-icons {
+  font-size: 16px;
+}
+
+body.ttrss_main .rss-gallery-preview-url {
+  flex: 0 0 auto;
+  overflow: hidden;
+  margin: 6px 0 14px;
+  color: #777;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.ttrss_main .rss-gallery-preview-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+body.ttrss_main .rss-gallery-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+body.ttrss_main .rss-gallery-preview-item {
+  display: flex;
+  box-sizing: border-box;
+  min-height: 104px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: inherit;
+  flex-direction: column;
+  justify-content: space-between;
+  text-decoration: none;
+}
+
+body.ttrss_main .rss-gallery-preview-item:hover {
+  border-color: #b8c7da;
+  background: #f7faff;
+}
+
+body.ttrss_main .rss-gallery-item-title {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #333;
+  font-weight: 600;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+body.ttrss_main .rss-gallery-item-date {
+  margin-top: 10px;
+  color: #777;
+  font-size: 12px;
+}
+
+body.ttrss_main .rss-gallery-state {
+  padding: 20px;
+  color: #777;
+  text-align: center;
+}
+
+body.ttrss_main .rss-gallery-state.error {
+  color: #b00020;
+}
+
+body.ttrss_main .rss-gallery-state small {
+  display: block;
+  margin-top: 8px;
+  color: #777;
+}
+
+@media (width <= 760px) {
+  body.ttrss_main .rss-gallery {
+    grid-template-columns: 1fr;
+    width: 100%;
+    height: calc(100vh - 120px);
+  }
+
+  body.ttrss_main .rss-gallery-list-pane {
+    max-height: 38vh;
+    border-right: 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  body.ttrss_main .rss-gallery-preview-grid {
+    grid-template-columns: 1fr;
+  }
+}

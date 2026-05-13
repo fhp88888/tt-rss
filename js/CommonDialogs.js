@@ -23,6 +23,216 @@ const	CommonDialogs = {
 
 			dialog.show();
 		},
+		rssGallery: function() {
+			const dialog = new fox.SingleUseDialog({
+				id: "rssGalleryDlg",
+				title: __("RSS Gallery"),
+				feeds: [],
+				filteredFeeds: [],
+				selectedFeed: null,
+				previewSeq: 0,
+				content: `
+					<div class="rss-gallery">
+						<div class="rss-gallery-list-pane">
+							<div class="rss-gallery-search">
+								<input type="text" class="rss-gallery-search-input"
+									placeholder="${__("Search feeds")}" autocomplete="off">
+							</div>
+							<div class="rss-gallery-feed-list">
+								<div class="rss-gallery-state">${__("Loading, please wait...")}</div>
+							</div>
+						</div>
+						<div class="rss-gallery-preview-pane">
+							<div class="rss-gallery-preview-header">
+								<div class="rss-gallery-preview-title">${__("Select a feed")}</div>
+								<button type="button" class="rss-gallery-subscribe alt-primary" disabled>
+									<i class="material-icons">rss_feed</i>
+									<span>${__("Subscribe")}</span>
+								</button>
+							</div>
+							<div class="rss-gallery-preview-url"></div>
+							<div class="rss-gallery-preview-body">
+								<div class="rss-gallery-state">${__("Select a feed to preview latest articles.")}</div>
+							</div>
+						</div>
+					</div>
+				`,
+				loadFeeds: function() {
+					xhr.json("backend.php", {op: "Rss_Gallery", method: "list"}, (reply) => {
+						this.feeds = reply.feeds || [];
+						this.filteredFeeds = this.feeds;
+						this.renderFeedList();
+					}, () => {
+						this.feedListNode().innerHTML =
+							`<div class="rss-gallery-state error">${__("Could not load RSS gallery.")}</div>`;
+					});
+				},
+				feedListNode: function() {
+					return this.domNode.querySelector(".rss-gallery-feed-list");
+				},
+				previewBodyNode: function() {
+					return this.domNode.querySelector(".rss-gallery-preview-body");
+				},
+				renderFeedList: function() {
+					const list = this.feedListNode();
+
+					if (this.filteredFeeds.length === 0) {
+						list.innerHTML = `<div class="rss-gallery-state">${__("No feeds found.")}</div>`;
+						return;
+					}
+
+					list.innerHTML = this.filteredFeeds.map((feed, index) => `
+						<button type="button" class="rss-gallery-feed"
+							data-index="${index}" title="${App.escapeHtml(feed.url)}">
+							<span class="rss-gallery-feed-title">${App.escapeHtml(feed.title)}</span>
+							<span class="rss-gallery-feed-url">${App.escapeHtml(feed.url)}</span>
+						</button>
+					`).join("");
+
+					list.querySelectorAll(".rss-gallery-feed").forEach((row) => {
+						row.addEventListener("click", () => {
+							const feed = this.filteredFeeds[parseInt(row.dataset.index)];
+							this.selectFeed(feed);
+						});
+					});
+				},
+				filterFeeds: function(value) {
+					const needle = value.trim().toLocaleLowerCase();
+
+					this.filteredFeeds = needle ?
+						this.feeds.filter((feed) =>
+							feed.title.toLocaleLowerCase().includes(needle) ||
+							feed.url.toLocaleLowerCase().includes(needle)) :
+						this.feeds;
+
+					this.renderFeedList();
+				},
+				selectFeed: function(feed) {
+					this.selectedFeed = feed;
+
+					this.domNode.querySelectorAll(".rss-gallery-feed").forEach((row) => {
+						const rowFeed = this.filteredFeeds[parseInt(row.dataset.index)];
+						row.classList.toggle("selected", rowFeed && rowFeed.url === feed.url);
+					});
+
+					this.domNode.querySelector(".rss-gallery-preview-title").innerText = feed.title;
+					this.domNode.querySelector(".rss-gallery-preview-url").innerText = feed.url;
+					this.domNode.querySelector(".rss-gallery-subscribe").disabled = false;
+					this.previewFeed(feed);
+				},
+				previewFeed: function(feed) {
+					const seq = ++this.previewSeq;
+
+					this.previewBodyNode().innerHTML =
+						`<div class="rss-gallery-state">${__("Loading, please wait...")}</div>`;
+
+					xhr.json("backend.php", {op: "Rss_Gallery", method: "preview", url: feed.url}, (reply) => {
+						if (seq !== this.previewSeq)
+							return;
+
+						if (reply.error) {
+							this.previewBodyNode().innerHTML = `
+								<div class="rss-gallery-state error">
+									<div>${App.escapeHtml(reply.error)}</div>
+									${reply.detail ? `<small>${App.escapeHtml(reply.detail)}</small>` : ""}
+								</div>`;
+							return;
+						}
+
+						this.renderPreview(reply);
+					}, () => {
+						if (seq === this.previewSeq) {
+							this.previewBodyNode().innerHTML =
+								`<div class="rss-gallery-state error">${__("Could not load feed preview.")}</div>`;
+						}
+					});
+				},
+				renderPreview: function(preview) {
+					const items = preview.items || [];
+
+					if (items.length === 0) {
+						this.previewBodyNode().innerHTML =
+							`<div class="rss-gallery-state">${__("No articles found.")}</div>`;
+						return;
+					}
+
+					this.previewBodyNode().innerHTML = `
+						<div class="rss-gallery-preview-grid">
+							${items.map((item) => `
+								<a class="rss-gallery-preview-item" target="_blank" rel="noopener noreferrer"
+									href="${App.escapeHtml(App.sanitizeUrl(item.link || "#"))}">
+									<span class="rss-gallery-item-title">${App.escapeHtml(item.title)}</span>
+									<span class="rss-gallery-item-date">${App.escapeHtml(item.date)}</span>
+								</a>
+							`).join("")}
+						</div>`;
+				},
+				subscribeSelected: function() {
+					if (!this.selectedFeed)
+						return;
+
+					const feedUrl = this.selectedFeed.url;
+
+					this.domNode.querySelector(".rss-gallery-subscribe").disabled = true;
+					Notify.progress(__("Subscribing..."), true);
+
+					xhr.json("backend.php", {op: "Feeds", method: "add", feed: feedUrl}, (reply) => {
+						Notify.close();
+						this.domNode.querySelector(".rss-gallery-subscribe").disabled = false;
+
+						const rc = reply.result || {};
+
+						switch (parseInt(rc.code)) {
+							case 0:
+								Notify.info(__("You are already subscribed to this feed."));
+								break;
+							case 1:
+								Notify.info(__("Subscribed to %s").replace("%s", feedUrl));
+
+								if (App.isPrefs())
+									dijit.byId("feedTree").reload();
+								else
+									Feeds.reload();
+
+								break;
+							case 2:
+								Notify.error(__("Specified URL seems to be invalid."));
+								break;
+							case 5:
+								Notify.error(__("Couldn't download the specified URL."));
+								break;
+							case 6:
+								Notify.error(__("Invalid content."));
+								break;
+							case 8:
+								Notify.error(__("You are not allowed to perform this operation."));
+								break;
+							default:
+								Notify.error(__("Error while creating feed database entry."));
+						}
+					}, () => {
+						Notify.close();
+						this.domNode.querySelector(".rss-gallery-subscribe").disabled = false;
+						Notify.error(__("Could not subscribe to feed."));
+					});
+				},
+			});
+
+			dialog.show();
+			dialog.domNode.style.width = "calc(100vw - 96px)";
+			dialog.domNode.style.maxWidth = "1440px";
+			dialog._position();
+
+			dialog.domNode.querySelector(".rss-gallery-search-input").addEventListener("input", (event) => {
+				dialog.filterFeeds(event.target.value);
+			});
+
+			dialog.domNode.querySelector(".rss-gallery-subscribe").addEventListener("click", () => {
+				dialog.subscribeSelected();
+			});
+
+			dialog.loadFeeds();
+		},
 		subscribeToFeed: function() {
 			xhr.json("backend.php",
 					{op: "Feeds", method: "subscribeToFeed"},

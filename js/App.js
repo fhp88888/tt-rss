@@ -1213,6 +1213,9 @@ const App = {
          case "qmcAddFeed":
             CommonDialogs.subscribeToFeed();
             break;
+         case "qmcRssGallery":
+            CommonDialogs.rssGallery();
+            break;
          case "qmcDigest":
             window.location.href = "backend.php?op=Digest";
             break;
