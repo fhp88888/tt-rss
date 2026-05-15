@@ -58,6 +58,7 @@ class Prefs {
 	const DEBUG_HEADLINE_IDS = "DEBUG_HEADLINE_IDS";
 	const DISABLE_CONDITIONAL_COUNTERS = "DISABLE_CONDITIONAL_COUNTERS";
 	const WIDESCREEN_MODE = "WIDESCREEN_MODE";
+	const AUTO_MARK_READ_ON_SCROLL = "AUTO_MARK_READ_ON_SCROLL";
 	const DIGEST_MIN_SCORE = "DIGEST_MIN_SCORE";
 	const AI_SUMMARIES_ENABLED = "AI_SUMMARIES_ENABLED";
 	const AI_ENDPOINT = "AI_ENDPOINT";
@@ -122,7 +123,8 @@ class Prefs {
 		Prefs::HEADLINES_NO_DISTINCT => [ false, Config::T_BOOL ],
 		Prefs::DEBUG_HEADLINE_IDS => [ false, Config::T_BOOL ],
 		Prefs::DISABLE_CONDITIONAL_COUNTERS => [ false, Config::T_BOOL ],
-		Prefs::WIDESCREEN_MODE => [ false, Config::T_BOOL ],
+		Prefs::WIDESCREEN_MODE => [ true, Config::T_BOOL ],
+		Prefs::AUTO_MARK_READ_ON_SCROLL => [ true, Config::T_BOOL ],
 		Prefs::DIGEST_MIN_SCORE => [ 0, Config::T_INT ],
 		Prefs::AI_SUMMARIES_ENABLED => [ false, Config::T_BOOL ],
 		Prefs::AI_ENDPOINT => [ "https://api.openai.com/v1/chat/completions", Config::T_STRING ],

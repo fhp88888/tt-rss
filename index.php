@@ -207,22 +207,11 @@
 							echo $result;
 						});
 
-							$disable_widescreen = json_encode(__('Disable widescreen mode'));
-							$enable_widescreen = json_encode(__('Enable widescreen mode'));
 						?>
 
 					<div dojoType="fox.form.DropDownButton" class="action-button" title="<?= __('Actions...') ?>">
 						<span><i class="material-icons">menu</i></span>
 						<div dojoType="dijit.Menu" style="display: none">
-									<script type='dojo/method' event='onOpen' args='evt,a,b,c'>
-										const widescreen = this.getChildren().find((m) => m.id == 'qmcToggleWidescreen');
-
-										if (widescreen)
-											widescreen
-												.attr('label',
-													App.isWideScreenMode() ? <?= $disable_widescreen ?> : <?= $enable_widescreen ?>);
-									</script>
-
 								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcPrefs')"><?= __('Preferences...') ?></div>
 								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcSearch')"><?= __('Search...') ?></div>
 								<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcFilterFeeds')"><?= __('Search feeds...') ?></div>
@@ -234,9 +223,6 @@
 								<div dojoType="dijit.MenuItem" disabled="1"><?= __('All feeds:') ?></div>
 									<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcCatchupAll')"><?= __('Mark as read') ?></div>
 									<div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcShowOnlyUnread')"><?= __('(Un)hide read feeds') ?></div>
-									<div dojoType="dijit.MenuItem" disabled="1"><?= __('UI layout:') ?></div>
-									<div dojoType="dijit.MenuItem" id="qmcToggleWidescreen" onclick="App.onActionSelected('qmcToggleWidescreen')">
-										<?= __('Toggle widescreen mode') ?></div>
 									<div dojoType="dijit.MenuItem" disabled="1"><?= __('Other actions:') ?></div>
                         <div dojoType="dijit.MenuItem" onclick="App.onActionSelected('qmcHKhelp')"><?= __('Keyboard shortcuts help') ?></div>
 
@@ -255,15 +241,21 @@
             </div>
         </div> <!-- toolbar -->
         </div> <!-- toolbar pane -->
-        <div id="headlines-wrap-inner" dojoType="dijit.layout.BorderContainer" region="center">
-            <div id="headlines-frame" dojoType="dijit.layout.ContentPane" tabindex="0"
-                    region="center">
+        <div id="headlines-wrap-inner" dojoType="dijit.layout.BorderContainer" region="center" design="sidebar">
+            <div id="headlines-frame" dojoType="dijit.layout.ContentPane" tabindex="0" data-is-wide-screen="true"
+                    region="center" style="border-bottom-width : 0">
                 <div id="headlinesInnerContainer">
                     <div class="whiteBox"><?= __('Loading, please wait...') ?></div>
                 </div>
             </div>
-            <div id="content-insert" dojoType="dijit.layout.ContentPane" region="bottom"
-                style="height : 50%" splitter="true"></div>
+            <div id="content-insert" dojoType="dijit.layout.ContentPane" region="trailing"
+                style="width : 50%; height : auto; border-top-width : 0" splitter="true">
+				<div class="article-empty-state">
+					<i class="material-icons">article</i>
+					<h2><?= __('Pick an article to start reading.') ?></h2>
+					<p><?= __('Select a headline from the timeline and it will open here.') ?></p>
+				</div>
+			</div>
         </div>
     </div>
 </div>

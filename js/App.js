@@ -11,7 +11,7 @@ const App = {
 	hotkey_prefix_pressed: false,
 	hotkey_prefix_timeout: 0,
    global_unread: -1,
-   _widescreen_mode: false,
+   _widescreen_mode: true,
    _loading_progress: 0,
    _night_mode_retry_timeout: false,
    hotkey_actions: {},
@@ -803,7 +803,7 @@ const App = {
          dojo.connect(dijit.byId('content-insert'), 'resize',
             (args) => {
                if (args && args.w >= 0 && args.h >= 0) {
-						const cookie_suffix = this._widescreen_mode ? "wide" : "normal";
+						const cookie_suffix = "wide";
 
                   Cookie.set("ttrss_ci_width:" + cookie_suffix, args.w, this.getInitParam("cookie_lifetime"));
                   Cookie.set("ttrss_ci_height:" + cookie_suffix, args.h, this.getInitParam("cookie_lifetime"));
@@ -814,8 +814,7 @@ const App = {
 
          this.setLoadingProgress(50);
 
-         this._widescreen_mode = this.getInitParam("widescreen");
-         this.setWideScreenMode(this.isWideScreenMode(), true);
+         this.setWideScreenMode();
 
          Headlines.initScrollHandler();
 
@@ -903,54 +902,36 @@ const App = {
 	isWideScreenMode: function() {
 		return !!this._widescreen_mode;
 	},
-   setWideScreenMode: function(wide) {
+   setWideScreenMode: function() {
 
-		this._widescreen_mode = wide;
+		this._widescreen_mode = true;
 
-      const article_id = Article.getActive();
       const headlines_frame = document.getElementById("headlines-frame");
+      const headlines_wrap = dijit.byId("headlines-wrap-inner");
       const content_insert = dijit.byId("content-insert");
 
       // TODO: setStyle stuff should probably be handled by CSS
 
-      if (wide) {
-         dijit.byId("headlines-wrap-inner").attr("design", 'sidebar');
-         content_insert.attr("region", "trailing");
+      headlines_wrap.attr("design", 'sidebar');
+      content_insert.attr("region", "trailing");
 
-         content_insert.domNode.setStyle({width: '50%',
-            height: 'auto',
-            borderTopWidth: '0px' });
+      content_insert.domNode.setStyle({width: '50%',
+         height: 'auto',
+         borderTopWidth: '0px' });
 
-         if (parseInt(Cookie.get("ttrss_ci_width:wide")) > 0) {
-            content_insert.domNode.setStyle(
-               {width: Cookie.get("ttrss_ci_width:wide") + "px" });
-         }
-
-         headlines_frame.setStyle({ borderBottomWidth: '0px' });
-
-      } else {
-
-         content_insert.attr("region", "bottom");
-
-         content_insert.domNode.setStyle({width: 'auto',
-            height: '50%',
-            borderTopWidth: '0px'});
-
-         if (parseInt(Cookie.get("ttrss_ci_height:normal")) > 0) {
-            content_insert.domNode.setStyle(
-               {height: Cookie.get("ttrss_ci_height:normal") + "px" });
-         }
-
-         headlines_frame.setStyle({ borderBottomWidth: '1px' });
+      if (parseInt(Cookie.get("ttrss_ci_width:wide")) > 0) {
+         content_insert.domNode.setStyle(
+            {width: Cookie.get("ttrss_ci_width:wide") + "px" });
       }
 
-      headlines_frame.setAttribute("data-is-wide-screen", wide ? "true" : "false");
+      headlines_frame.setStyle({ borderBottomWidth: '0px' });
 
-      Article.close();
+      headlines_frame.setAttribute("data-is-wide-screen", "true");
 
-      if (article_id) Article.view(article_id);
+      if (content_insert.getParent() !== headlines_wrap)
+         headlines_wrap.addChild(content_insert);
 
-      xhr.post("backend.php", {op: "RPC", method: "setWidescreen", wide: wide ? 1 : 0});
+      headlines_wrap.resize();
    },
    initHotkeyActions: function() {
       if (this.is_prefs) {
@@ -1185,9 +1166,6 @@ const App = {
                alert(__("Please enable af_readability first."));
             }
          };
-         this.hotkey_actions["toggle_widescreen"] = () => {
-				this.setWideScreenMode(!this.isWideScreenMode());
-         };
          this.hotkey_actions["help_dialog"] = () => {
             this.hotkeyHelp();
          };
@@ -1251,9 +1229,6 @@ const App = {
             break;
          case "qmcShowOnlyUnread":
             Feeds.toggleUnread();
-            break;
-         case "qmcToggleWidescreen":
-            App.setWideScreenMode(!App.isWideScreenMode());
             break;
          case "qmcHKhelp":
             this.hotkeyHelp()

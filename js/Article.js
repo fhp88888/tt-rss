@@ -51,11 +51,24 @@ const Article = {
 		}
 	},
 	close: function () {
-		if (dijit.byId("content-insert"))
-			dijit.byId("headlines-wrap-inner").removeChild(
-				dijit.byId("content-insert"));
+		const content_insert = dijit.byId("content-insert");
+		const headlines_wrap = dijit.byId("headlines-wrap-inner");
+
+		if (content_insert) {
+			if (content_insert.getParent() !== headlines_wrap)
+				headlines_wrap.addChild(content_insert);
+
+			content_insert.attr("content", Article.emptyState());
+		}
 
 		Article.setActive(0);
+	},
+	emptyState: function () {
+		return `<div class="article-empty-state">
+			<i class="material-icons">article</i>
+			<h2>${App.escapeHtml(__("Pick an article to start reading."))}</h2>
+			<p>${App.escapeHtml(__("Select a headline from the timeline and it will open here."))}</p>
+		</div>`;
 	},
 	copyUrl: async function (id) {
 		const hl = Headlines.objectById(id);
@@ -164,10 +177,13 @@ const Article = {
 	render: function (article) {
 		App.cleanupMemory("content-insert");
 
-		dijit.byId("headlines-wrap-inner").addChild(
-			dijit.byId("content-insert"));
+		const headlines_wrap = dijit.byId("headlines-wrap-inner");
+		const content_insert = dijit.byId("content-insert");
 
-		const c = dijit.byId("content-insert");
+		if (content_insert.getParent() !== headlines_wrap)
+			headlines_wrap.addChild(content_insert);
+
+		const c = content_insert;
 
 		try {
 			c.domNode.scrollTop = 0;

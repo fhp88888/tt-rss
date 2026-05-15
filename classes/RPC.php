@@ -236,7 +236,7 @@ class RPC extends Handler_Protected {
 	}
 
 	function setWidescreen(): void {
-		$wide = (int) clean($_REQUEST["wide"]);
+		$wide = 1;
 
 		Prefs::set(Prefs::WIDESCREEN_MODE, $wide, $_SESSION['uid'], $_SESSION['profile'] ?? null);
 
@@ -346,7 +346,7 @@ class RPC extends Handler_Protected {
 				Prefs::ENABLE_FEED_CATS, Prefs::FEEDS_SORT_BY_UNREAD,
 				Prefs::CONFIRM_FEED_CATCHUP,
 				Prefs::FRESH_ARTICLE_MAX_AGE, Prefs::RECENTLY_READ_MAX_AGE, Prefs::HIDE_READ_SHOWS_SPECIAL,
-				Prefs::DEBUG_HEADLINE_IDS] as $param) {
+				Prefs::DEBUG_HEADLINE_IDS, Prefs::AUTO_MARK_READ_ON_SCROLL] as $param) {
 
 				$params[strtolower($param)] = (int) Prefs::get($param, $_SESSION['uid'], $profile);
 			}
@@ -384,7 +384,7 @@ class RPC extends Handler_Protected {
 		$params["max_feed_id"] = (int) $max_feed_id;
 		$params["num_feeds"] = (int) $num_feeds;
 		$params["hotkeys"] = static::get_hotkeys_map();
-		$params["widescreen"] = (int) Prefs::get(Prefs::WIDESCREEN_MODE, $_SESSION['uid'], $profile);
+		$params["widescreen"] = 1;
 		$params["icon_indicator_white"] = $this->image_to_base64("images/indicator_white.gif");
 		$params["icon_oval"] = $this->image_to_base64("images/oval.svg");
 		$params["icon_three_dots"] = $this->image_to_base64("images/three-dots.svg");
@@ -506,7 +506,6 @@ class RPC extends Handler_Protected {
 				"article_page_up" => __("Scroll up page"),
 				"email_article" => __("Email article"),
 					"close_article" => __("Close/collapse article"),
-					"toggle_widescreen" => __("Toggle widescreen mode"),
 				"toggle_full_text" => __("Toggle full article text via Readability")],
 			__("Feed") => [
 				"feed_refresh" => __("Refresh current feed"),
@@ -574,7 +573,6 @@ class RPC extends Handler_Protected {
 			"o" => "open_in_new_window",
 			"c p" => "catchup_below",
 			"c n" => "catchup_above",
-			"a W" => "toggle_widescreen",
 			"a e" => "toggle_full_text",
 			"e" => "email_article",
 				"a q" => "close_article",

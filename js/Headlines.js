@@ -11,6 +11,7 @@ const Headlines = {
 	headlines: [],
 	current_first_id: 0,
 	_scroll_reset_timeout: false,
+	_auto_mark_read_seen_ids: new Set(),
 	default_force_previous: false,
 	default_force_to_top: false,
 	line_scroll_offset: 120, /* px */
@@ -187,6 +188,52 @@ const Headlines = {
 	isChildVisible: function (elem) {
 		return App.Scrollable.isChildVisible(elem, document.getElementById("headlines-frame"));
 	},
+	resetAutoMarkReadState: function () {
+		this._auto_mark_read_seen_ids.clear();
+	},
+	rowIntersectsViewport: function (row, container) {
+		const viewport_top = container.scrollTop;
+		const viewport_bottom = viewport_top + container.offsetHeight;
+		const row_top = row.offsetTop;
+		const row_bottom = row_top + row.offsetHeight;
+
+		return row_bottom > viewport_top && row_top < viewport_bottom;
+	},
+	updateAutoMarkReadOnScroll: function () {
+		if (App.getInitParam("auto_mark_read_on_scroll") !== 1 || !App.isWideScreenMode())
+			return;
+
+		const container = document.getElementById("headlines-frame");
+
+		if (!container)
+			return;
+
+		document.querySelectorAll('#headlines-frame > div[id*=RROW].Unread').forEach((row) => {
+			const id = parseInt(row.getAttribute('data-article-id'));
+
+			if (this.rowIntersectsViewport(row, container))
+				this._auto_mark_read_seen_ids.add(id);
+		});
+
+		this._auto_mark_read_seen_ids.forEach((id) => {
+			const row = document.getElementById(`RROW-${id}`);
+
+			if (!row) {
+				this._auto_mark_read_seen_ids.delete(id);
+				return;
+			}
+
+			if (!row.classList.contains('Unread')) {
+				this._auto_mark_read_seen_ids.delete(id);
+				return;
+			}
+
+			if (!this.rowIntersectsViewport(row, container)) {
+				row.classList.remove('Unread');
+				this._auto_mark_read_seen_ids.delete(id);
+			}
+		});
+	},
 	firstVisible: function () {
 		const rows = document.querySelectorAll('#headlines-frame > div[id*=RROW]');
 
@@ -200,6 +247,8 @@ const Headlines = {
 	},
 	scrollHandler: function (/*event*/) {
 		try {
+			this.updateAutoMarkReadOnScroll();
+
 			if (!Feeds.infscroll_disabled && !Feeds.infscroll_in_progress) {
 				const hsp = document.getElementById("headlines-spacer");
 				const container = document.getElementById("headlines-frame");
@@ -466,6 +515,7 @@ const Headlines = {
 					reply['headlines']['is_vfeed'] ? "true" : "false");
 
 				Article.setActive(0);
+				this.resetAutoMarkReadState();
 
 				try {
 					const headlines_frame = document.getElementById('headlines-frame');

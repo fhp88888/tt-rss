@@ -62,6 +62,7 @@ class Pref_Prefs extends Handler_Protected {
 					Prefs::VFEED_GROUP_BY_FEED,
 					self::BLOCK_SEPARATOR,
 				Prefs::SHOW_CONTENT_PREVIEW,
+				Prefs::AUTO_MARK_READ_ON_SCROLL,
 				Prefs::STRIP_IMAGES,
 			],
 			__('Digest') => [
@@ -110,6 +111,7 @@ class Pref_Prefs extends Handler_Protected {
 			Prefs::PURGE_UNREAD_ARTICLES => [__("Purge unread articles")],
 			Prefs::SHORT_DATE_FORMAT => [__("Short date format")],
 			Prefs::SHOW_CONTENT_PREVIEW => [__("Show content preview in headlines")],
+			Prefs::AUTO_MARK_READ_ON_SCROLL => [__("Mark articles as read after scrolling past them"), __("Only applies to the middle headlines panel")],
 			Prefs::SSL_CERT_SERIAL => [__("SSL client certificate")],
 			Prefs::STRIP_IMAGES => [__("Do not embed media")],
 			Prefs::USER_TIMEZONE => [__("Time zone")],
