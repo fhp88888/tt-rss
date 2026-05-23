@@ -13,7 +13,7 @@ Selection criteria:
 - Include a diversity of topics where possible
 
 Return ONLY valid JSON in this exact format, with no other text:
-{"articles":[{"index":<number>,"reason":"<one-line explanation in English>"}]}
+{"articles":[{"index":<number>,"reason":"<one-line explanation in Chinese>"}]}
 PROMPT;
 
 	private readonly PDO $pdo;
@@ -202,7 +202,7 @@ PROMPT;
 
 			$header = "Below is a list of unread articles from the RSS feed \"$feed_title\" from the last 24 hours.\n\n";
 			$header .= "Select the $select_count most important, insightful, or meaningful articles. ";
-			$header .= "For each selected article, provide the article number (1-based index) and a one-line reason in English explaining why it matters.\n\n";
+			$header .= "For each selected article, provide the article number (1-based index) and a one-line reason in Chinese explaining why it matters.\n\n";
 
 			$prompt = $header;
 			$included = 0;
