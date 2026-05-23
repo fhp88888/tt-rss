@@ -533,6 +533,10 @@ const Article = {
 				${entriesHtml}
 			</div>
 			<div class="article-digest-footer">
+				<button onclick="Article.markAllReadInDigest(${feedId}, '${generatedAt}')">
+					<i class="material-icons">done_all</i>
+					${App.escapeHtml(__("Mark ALL as Read"))}
+				</button>
 				<button onclick="Article.regenerateDigest(${feedId})">
 					<i class="material-icons">refresh</i>
 					${App.escapeHtml(__("Regenerate"))}
@@ -594,7 +598,23 @@ const Article = {
 		} catch {
 			return '';
 		}
-	}
+	},
+
+	markAllReadInDigest: function (feedId, before) {
+		if (!confirm(__("Mark ALL articles in this feed before the digest time as read?"))) return;
+
+		xhr.json("backend.php", {op: "Feeds", method: "catchupDigest", feed_id: feedId, before: before}, (reply) => {
+			if (reply?.success) {
+				Notify.info(__("Articles marked as read."));
+				const feed = feedId;
+				xhr.json("backend.php", {op: "Feeds", method: "view", feed: feed}, (reply2) => {
+					Headlines.onLoaded(reply2, 0, false);
+				});
+			} else {
+				Notify.error(reply?.error || __("Failed to mark articles as read."));
+			}
+		});
+	},
 }
 
 // Expose to global scope for Dojo widget onclick handlers (needed since Dojo 1.17.3)

@@ -2472,4 +2472,30 @@ class Feeds extends Handler_Protected {
 
 		print json_encode(["success" => true, "enabled" => $enabled]);
 	}
+	function catchupDigest(): void {
+		$feed_id = (int) ($_REQUEST["feed_id"] ?? 0);
+		$before = $_REQUEST["before"] ?? "";
+
+		if ($feed_id <= 0 || $before === "") {
+			print json_encode(["error" => "Invalid parameters"]);
+			return;
+		}
+
+		$feed = ORM::for_table('ttrss_feeds')
+			->where('owner_uid', $_SESSION['uid'])
+			->find_one($feed_id);
+
+		if (!$feed) {
+			print json_encode(["error" => "Feed not found"]);
+			return;
+		}
+
+		$sth = $this->pdo->prepare("UPDATE ttrss_user_entries
+			SET unread = false, last_read = NOW()
+			WHERE feed_id = :feed_id AND owner_uid = :owner_uid AND unread = true
+			AND ref_id IN (SELECT id FROM ttrss_entries WHERE date_entered < :before)");
+		$sth->execute([":feed_id" => $feed_id, ":owner_uid" => $_SESSION['uid'], ":before" => $before]);
+
+		print json_encode(["success" => true]);
+	}
 }
