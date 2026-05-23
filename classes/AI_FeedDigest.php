@@ -12,8 +12,10 @@ Selection criteria:
 - Avoid redundancy: if multiple articles cover the same story, pick only the best one
 - Include a diversity of topics where possible
 
+CRITICAL: All reasons MUST be written in Chinese (中文). Do NOT write reasons in English or any other language.
+
 Return ONLY valid JSON in this exact format, with no other text:
-{"articles":[{"index":<number>,"reason":"<one-line explanation in Chinese>"}]}
+{"articles":[{"index":<number>,"reason":"<explain in Chinese why this article matters>"}]}
 PROMPT;
 
 	private readonly PDO $pdo;
@@ -202,7 +204,7 @@ PROMPT;
 
 			$header = "Below is a list of unread articles from the RSS feed \"$feed_title\" from the last 24 hours.\n\n";
 			$header .= "Select the $select_count most important, insightful, or meaningful articles. ";
-			$header .= "For each selected article, provide the article number (1-based index) and a one-line reason in Chinese explaining why it matters.\n\n";
+			$header .= "For each selected article, provide the article number (1-based index) and write the reason in Chinese (中文).\n\n";
 
 			$prompt = $header;
 			$included = 0;
@@ -223,7 +225,7 @@ PROMPT;
 			// Rebuild header with actual count
 			$final_header = "Below is a list of $included unread articles from the RSS feed \"$feed_title\" from the last 24 hours.\n\n";
 			$final_header .= "Select the " . min($select_count, $included) . " most important, insightful, or meaningful articles. ";
-			$final_header .= "For each selected article, provide the article number (1-based index) and a one-line reason in English explaining why it matters.\n\n";
+			$final_header .= "For each selected article, provide the article number (1-based index) and write the reason in Chinese (中文).\n\n";
 
 			$prompt = $final_header . mb_substr($prompt, mb_strlen($header, "utf-8"), null, "utf-8");
 
