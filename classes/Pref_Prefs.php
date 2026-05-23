@@ -234,6 +234,12 @@ class Pref_Prefs extends Handler_Protected {
 			$has_api_key = trim((string) Prefs::get(Prefs::AI_API_KEY, $owner_uid)) !== "";
 			$max_chars = (string) Prefs::get(Prefs::AI_SUMMARY_MAX_CHARS, $owner_uid);
 			$concurrency = (string) Prefs::get(Prefs::AI_SUMMARY_CONCURRENCY, $owner_uid);
+			$digest_article_count = (string) Prefs::get(Prefs::AI_DIGEST_ARTICLE_COUNT, $owner_uid);
+			$digest_lookback = (string) Prefs::get(Prefs::AI_DIGEST_LOOKBACK_HOURS, $owner_uid);
+			$digest_cache_ttl = (string) Prefs::get(Prefs::AI_DIGEST_CACHE_TTL_MINUTES, $owner_uid);
+			$digest_max_sent = (string) Prefs::get(Prefs::AI_DIGEST_MAX_ARTICLES_SENT, $owner_uid);
+			$digest_max_prompt = (string) Prefs::get(Prefs::AI_DIGEST_MAX_PROMPT_CHARS, $owner_uid);
+			$digest_llm_timeout = (string) Prefs::get(Prefs::AI_DIGEST_LLM_TIMEOUT, $owner_uid);
 			$status = AISummary::get_status($owner_uid);
 			?>
 			<form dojoType='dijit.form.Form' id='aiSettingsForm' class='ai-settings-form'>
@@ -310,6 +316,46 @@ class Pref_Prefs extends Handler_Protected {
 						<label><?= __("Maximum concurrent AI requests") ?>:</label>
 						<?= \Controls\number_spinner_tag(Prefs::AI_SUMMARY_CONCURRENCY, $concurrency, ["required" => true, "smallDelta" => 1, "constraints" => "{min:0,places:0}"]) ?>
 					</fieldset>
+						<h3><?= __("AI Feed Digest") ?></h3>
+
+						<fieldset class='prefs'>
+							<label><?= __("Articles to select") ?>:</label>
+							<?= \Controls\number_spinner_tag(Prefs::AI_DIGEST_ARTICLE_COUNT, $digest_article_count, ["required" => true, "smallDelta" => 5, "constraints" => "{min:1,max:50,places:0}"]) ?>
+							<p class='field-hint'><?= __("How many articles the AI should pick from the last 24 hours.") ?></p>
+						</fieldset>
+
+						<fieldset class='prefs'>
+							<label><?= __("Lookback window (hours)") ?>:</label>
+							<?= \Controls\number_spinner_tag(Prefs::AI_DIGEST_LOOKBACK_HOURS, $digest_lookback, ["required" => true, "smallDelta" => 6, "constraints" => "{min:1,max:168,places:0}"]) ?>
+							<p class='field-hint'><?= __("Only consider unread articles published within this many hours.") ?></p>
+						</fieldset>
+
+						<fieldset class='prefs'>
+							<label><?= __("Regeneration interval (minutes)") ?>:</label>
+							<?= \Controls\number_spinner_tag(Prefs::AI_DIGEST_CACHE_TTL_MINUTES, $digest_cache_ttl, ["required" => true, "smallDelta" => 30, "constraints" => "{min:10,max:1440,places:0}"]) ?>
+							<p class='field-hint'><?= __("Digest will be regenerated when older than this. Scheduled task runs every 2 hours.") ?></p>
+						</fieldset>
+
+						<h4><?= __("LLM Call") ?></h4>
+
+						<fieldset class='prefs'>
+							<label><?= __("Max articles sent to AI") ?>:</label>
+							<?= \Controls\number_spinner_tag(Prefs::AI_DIGEST_MAX_ARTICLES_SENT, $digest_max_sent, ["required" => true, "smallDelta" => 20, "constraints" => "{min:5,max:500,places:0}"]) ?>
+							<p class='field-hint'><?= __("Upper bound on how many articles are passed to the AI for selection.") ?></p>
+						</fieldset>
+
+						<fieldset class='prefs'>
+							<label><?= __("Max prompt size (chars)") ?>:</label>
+							<?= \Controls\number_spinner_tag(Prefs::AI_DIGEST_MAX_PROMPT_CHARS, $digest_max_prompt, ["required" => true, "smallDelta" => 10000, "constraints" => "{min:1000,max:500000,places:0}"]) ?>
+							<p class='field-hint'><?= __("Prompt will be trimmed if it exceeds this limit.") ?></p>
+						</fieldset>
+
+						<fieldset class='prefs'>
+							<label><?= __("LLM timeout (seconds)") ?>:</label>
+							<?= \Controls\number_spinner_tag(Prefs::AI_DIGEST_LLM_TIMEOUT, $digest_llm_timeout, ["required" => true, "smallDelta" => 5, "constraints" => "{min:5,max:120,places:0}"]) ?>
+							<p class='field-hint'><?= __("Must be below PHP max_execution_time (currently 30s).") ?></p>
+						</fieldset>
+
 				</div>
 				<div dojoType="dijit.layout.ContentPane" region="bottom">
 					<button dojoType="dijit.form.Button" type="submit" class="alt-primary">

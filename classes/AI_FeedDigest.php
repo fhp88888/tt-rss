@@ -1,14 +1,7 @@
 <?php
 
 class AI_FeedDigest {
-	private const DIGEST_ARTICLE_COUNT = 15;
-	private const DIGEST_LOOKBACK_HOURS = 24;
-	private const DIGEST_CACHE_TTL_HOURS = 2;
-	private const MAX_ARTICLES_SENT = 120;
-	private const MAX_PROMPT_CHARS = 100000;
-	private const LLM_TIMEOUT_SECONDS = 28;
-	private const MAX_TITLE_CHARS = 300;
-	private const MAX_EXCERPT_CHARS = 500;
+	// Configurable per-user: see Prefs::AI_DIGEST_* constants
 
 	private const SYSTEM_PROMPT = <<<'PROMPT'
 You are an expert news curator. Your task is to select the most important, insightful, and meaningful articles from a list of RSS feed items.
@@ -80,15 +73,19 @@ PROMPT;
 			AND (
 				NOT EXISTS (SELECT 1 FROM ttrss_ai_digests d WHERE d.feed_id = f.id AND d.owner_uid = f.owner_uid)
 				OR EXISTS (SELECT 1 FROM ttrss_ai_digests d WHERE d.feed_id = f.id AND d.owner_uid = f.owner_uid
-					AND d.generated_at < NOW() - CAST(:ttl AS integer) * INTERVAL '1 hour')
+					AND d.generated_at < NOW() - CAST(:ttl AS integer) * INTERVAL '1 minute')
 			)");
 
-		$sth->execute([":ttl" => self::DIGEST_CACHE_TTL_HOURS]);
+		$sth->execute([":ttl" => 60]);
 
 		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
-			if (self::is_configured((int) $row["owner_uid"])) {
-				$result = $instance->generate((int) $row["id"], (int) $row["owner_uid"]);
-				if ($result !== null) $regenerated++;
+			$owner = (int) $row["owner_uid"];
+			if (self::is_configured($owner)) {
+				$ttl_minutes = (int) Prefs::get(Prefs::AI_DIGEST_CACHE_TTL_MINUTES, $owner);
+				if ($instance->is_stale((int) $row["id"], $owner, $ttl_minutes)) {
+					$result = $instance->generate((int) $row["id"], $owner);
+					if ($result !== null) $regenerated++;
+				}
 			}
 		}
 
@@ -113,14 +110,16 @@ PROMPT;
 
 		$feed_title = $this->get_feed_title($feed_id);
 
-		$prompt = $this->build_prompt($articles, $feed_title);
+		$select_count = (int) Prefs::get(Prefs::AI_DIGEST_ARTICLE_COUNT, $owner_uid);
+		$max_prompt_chars = (int) Prefs::get(Prefs::AI_DIGEST_MAX_PROMPT_CHARS, $owner_uid);
+		$prompt = $this->build_prompt($articles, $feed_title, $select_count, $max_prompt_chars);
 
 		$endpoint = trim((string) Prefs::get(Prefs::AI_ENDPOINT, $owner_uid));
 		$model = trim((string) Prefs::get(Prefs::AI_MODEL, $owner_uid));
 		$api_key = trim((string) Prefs::get(Prefs::AI_API_KEY, $owner_uid));
 
 		try {
-			$response = $this->client->summarize($endpoint, $model, $api_key, $prompt, self::LLM_TIMEOUT_SECONDS, self::SYSTEM_PROMPT);
+			$response = $this->client->summarize($endpoint, $model, $api_key, $prompt, (int) Prefs::get(Prefs::AI_DIGEST_LLM_TIMEOUT, $owner_uid), self::SYSTEM_PROMPT);
 		} catch (Throwable $e) {
 			Debug::log("AI digest: LLM exception for feed $feed_id: " . $e->getMessage(), Debug::LOG_NORMAL);
 			return null;
@@ -166,8 +165,8 @@ PROMPT;
 		$sth->execute([
 			":feed_id" => $feed_id,
 			":owner_uid" => $owner_uid,
-			":hours" => self::DIGEST_LOOKBACK_HOURS,
-			":limit" => self::MAX_ARTICLES_SENT,
+			":hours" => (int) Prefs::get(Prefs::AI_DIGEST_LOOKBACK_HOURS, $owner_uid),
+			":limit" => (int) Prefs::get(Prefs::AI_DIGEST_MAX_ARTICLES_SENT, $owner_uid),
 		]);
 
 		$articles = [];
@@ -179,8 +178,8 @@ PROMPT;
 
 			$articles[] = [
 				"id" => (int) $row["id"],
-				"title" => mb_substr(trim(strip_tags((string) $row["title"])), 0, self::MAX_TITLE_CHARS, "utf-8"),
-				"excerpt" => mb_substr($text, 0, self::MAX_EXCERPT_CHARS, "utf-8"),
+				"title" => mb_substr(trim(strip_tags((string) $row["title"])), 0, 300, "utf-8"),
+				"excerpt" => mb_substr($text, 0, 500, "utf-8"),
 				"link" => (string) $row["link"],
 			];
 		}
@@ -197,9 +196,9 @@ PROMPT;
 	}
 
 	/** @param list<array{id:int, title:string, excerpt:string, link:string}> $articles */
-	private function build_prompt(array $articles, string $feed_title): string {
+	private function build_prompt(array $articles, string $feed_title, int $select_count, int $max_prompt_chars): string {
 			$count = count($articles);
-			$select_count = min(self::DIGEST_ARTICLE_COUNT, $count);
+			$select_count = min($select_count, $count);
 
 			$header = "Below is a list of unread articles from the RSS feed \"$feed_title\" from the last 24 hours.\n\n";
 			$header .= "Select the $select_count most important, insightful, or meaningful articles. ";
@@ -215,7 +214,7 @@ PROMPT;
 					$line .= "   Excerpt: {$article["excerpt"]}\n";
 				}
 
-				if (mb_strlen($prompt . $line, "utf-8") > self::MAX_PROMPT_CHARS) break;
+				if (mb_strlen($prompt . $line, "utf-8") > $max_prompt_chars) break;
 
 				$prompt .= $line;
 				$included++;
@@ -223,7 +222,7 @@ PROMPT;
 
 			// Rebuild header with actual count
 			$final_header = "Below is a list of $included unread articles from the RSS feed \"$feed_title\" from the last 24 hours.\n\n";
-			$final_header .= "Select the " . min(self::DIGEST_ARTICLE_COUNT, $included) . " most important, insightful, or meaningful articles. ";
+			$final_header .= "Select the " . min($select_count, $included) . " most important, insightful, or meaningful articles. ";
 			$final_header .= "For each selected article, provide the article number (1-based index) and a one-line reason in English explaining why it matters.\n\n";
 
 			$prompt = $final_header . mb_substr($prompt, mb_strlen($header, "utf-8"), null, "utf-8");
@@ -278,7 +277,7 @@ PROMPT;
 				"link" => $article["link"],
 			];
 
-			if (count($result) >= self::DIGEST_ARTICLE_COUNT) break;
+			if (count($result) >= 15) break;
 		}
 
 		return $result;
@@ -305,18 +304,34 @@ PROMPT;
 		}
 	}
 
+	private function is_stale(int $feed_id, int $owner_uid, int $ttl_minutes): bool {
+		$sth = $this->pdo->prepare(
+			"SELECT 1 FROM ttrss_ai_digests
+			WHERE feed_id = :feed_id AND owner_uid = :owner_uid
+			AND generated_at > NOW() - CAST(:ttl AS integer) * INTERVAL '1 minute'"
+		);
+		$sth->execute([
+			":feed_id" => $feed_id,
+			":owner_uid" => $owner_uid,
+			":ttl" => $ttl_minutes,
+		]);
+		return !$sth->fetch();
+	}
+
 	/** @return ?array{articles: list<array{id:int, title:string, reason:string, link:string}>, generated_at: string, total_unread: int} */
-	private function get_cached(int $feed_id, int $owner_uid): ?array {
+	private function get_cached(int $feed_id, int $owner_uid, ?int $ttl_minutes = null): ?array {
+		$ttl = $ttl_minutes ?? (int) Prefs::get(Prefs::AI_DIGEST_CACHE_TTL_MINUTES, $owner_uid);
+
 		$sth = $this->pdo->prepare(
 			"SELECT content FROM ttrss_ai_digests
 			WHERE feed_id = :feed_id AND owner_uid = :owner_uid
-			AND generated_at > NOW() - CAST(:ttl AS integer) * INTERVAL '1 hour'"
+			AND generated_at > NOW() - CAST(:ttl AS integer) * INTERVAL '1 minute'"
 		);
 
 		$sth->execute([
 			":feed_id" => $feed_id,
 			":owner_uid" => $owner_uid,
-			":ttl" => self::DIGEST_CACHE_TTL_HOURS,
+			":ttl" => $ttl,
 		]);
 
 		$row = $sth->fetch(PDO::FETCH_ASSOC);
