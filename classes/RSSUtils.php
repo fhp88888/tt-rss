@@ -1761,6 +1761,17 @@ class RSSUtils {
 				return 0;
 			}
 		);
+		$scheduler->add_scheduled_task('ai_digest_regeneration', '7 */2 * * *',
+			function() {
+				$regenerated = AI_FeedDigest::regenerate_stale();
+
+				if ($regenerated > 0) {
+					Debug::log("AI digest: regenerated $regenerated digests.");
+				}
+
+				return 0;
+			}
+		);
 	}
 
 	static function housekeeping_common(): void {

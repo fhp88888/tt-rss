@@ -711,6 +711,7 @@ class Pref_Feeds extends Handler_Protected {
 		$hide_images = checkbox_to_sql_bool($_POST["hide_images"] ?? "");
 		$always_display_enclosures = checkbox_to_sql_bool($_POST["always_display_enclosures"] ?? "");
 		$mark_unread_on_update = checkbox_to_sql_bool($_POST["mark_unread_on_update"] ?? "");
+			$ai_digest_enabled = checkbox_to_sql_bool($_POST["ai_digest_enabled"] ?? "");
 
 		$feed_language = clean($_POST["feed_language"] ?? "");
 
@@ -748,7 +749,7 @@ class Pref_Feeds extends Handler_Protected {
 				$feed->include_in_digest = 			(int)$include_in_digest;
 				$feed->always_display_enclosures =	(int)$always_display_enclosures;
 				$feed->mark_unread_on_update = 		(int)$mark_unread_on_update;
-
+					$feed->ai_digest_enabled = 			(int)$ai_digest_enabled;
 				$feed->save();
 
 				PluginHost::getInstance()->run_hooks(PluginHost::HOOK_PREFS_SAVE_FEED, $feed_id);
@@ -816,6 +817,10 @@ class Pref_Feeds extends Handler_Protected {
 						$qparams = [$mark_unread_on_update];
 						break;
 
+					case "ai_digest_enabled":
+						$qpart = "ai_digest_enabled = ?";
+						$qparams = [$ai_digest_enabled];
+						break;
 					case "cache_images":
 						$qpart = "cache_images = ?";
 						$qparams = [$cache_images];

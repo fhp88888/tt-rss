@@ -512,6 +512,9 @@ class Feeds extends Handler_Protected {
 		$reply['headlines'] = $ret[4];
 		$reply['headlines']['id'] = $next_unread_feed ?: $feed;
 		$reply['headlines']['is_cat'] = $cat_view;
+		if (!$cat_view && is_numeric($feed) && $feed > 0) {
+			$reply['headlines']['ai_digest_enabled'] = AI_FeedDigest::is_enabled_for_feed($feed);
+		}
 
 		$reply['headlines-info'] = [
 			'count' => (int) $headlines_count,
@@ -2411,4 +2414,62 @@ class Feeds extends Handler_Protected {
 		return $auth_pass;
 	}
 
+
+	function getDigest(): void {
+		$feed_id = (int) ($_REQUEST["feed_id"] ?? 0);
+		$force = self::_param_to_bool($_REQUEST["regenerate"] ?? false);
+		if ($feed_id <= 0) {
+			print json_encode(["error" => "Invalid feed ID"]);
+			return;
+		}
+
+		$feed = ORM::for_table('ttrss_feeds')
+			->where('owner_uid', $_SESSION['uid'])
+			->find_one($feed_id);
+
+		if (!$feed || !$feed->ai_digest_enabled) {
+			print json_encode(["digest" => null, "enabled" => false]);
+			return;
+		}
+
+		$digest = AI_FeedDigest::get_digest($feed_id, $_SESSION['uid'], $force);
+
+			if ($digest === null) {
+				$error_msg = "Failed to generate digest";
+				if (!AISummary::is_configured($_SESSION["uid"])) {
+					$error_msg = "AI not configured (check Preferences > AI)";
+				} else {
+					$error_msg = "LLM call failed - check endpoint connectivity";
+				}
+				print json_encode(["digest" => null, "enabled" => true, "error" => $error_msg]);
+				return;
+			}
+		print json_encode([
+			"digest" => $digest,
+			"enabled" => true,
+		]);
+	}
+
+	function toggleDigest(): void {
+		$feed_id = (int) ($_REQUEST["feed_id"] ?? 0);
+		$enabled = self::_param_to_bool($_REQUEST["enabled"] ?? false);
+
+		if ($feed_id <= 0) {
+			print json_encode(["error" => "Invalid feed ID"]);
+			return;
+		}
+
+		$feed = ORM::for_table('ttrss_feeds')
+			->where('owner_uid', $_SESSION['uid'])
+			->find_one($feed_id);
+
+		if (!$feed) {
+			print json_encode(["error" => "Feed not found"]);
+			return;
+		}
+
+		AI_FeedDigest::toggle_feed($feed_id, $enabled);
+
+		print json_encode(["success" => true, "enabled" => $enabled]);
+	}
 }

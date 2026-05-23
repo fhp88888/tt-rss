@@ -15,10 +15,10 @@ class LLMClient {
 		$this->client ??= new Client();
 	}
 
-	public function summarize(string $endpoint, string $model, string $apiKey, string $prompt, int $timeoutSeconds = 30): ?string {
+	public function summarize(string $endpoint, string $model, string $apiKey, string $prompt, int $timeoutSeconds = 30, ?string $systemPrompt = null): ?string {
 		try {
 			$response = $this->client->request('POST', $endpoint,
-				$this->request_options($model, $apiKey, $prompt, $timeoutSeconds));
+				$this->request_options($model, $apiKey, $prompt, $timeoutSeconds, $systemPrompt));
 		} catch (GuzzleException) {
 			return null;
 		}
@@ -26,9 +26,9 @@ class LLMClient {
 		return $this->parse_response($response);
 	}
 
-	public function summarize_async(string $endpoint, string $model, string $apiKey, string $prompt, int $timeoutSeconds = 30): PromiseInterface {
+	public function summarize_async(string $endpoint, string $model, string $apiKey, string $prompt, int $timeoutSeconds = 30, ?string $systemPrompt = null): PromiseInterface {
 		return $this->client->requestAsync('POST', $endpoint,
-			$this->request_options($model, $apiKey, $prompt, $timeoutSeconds))->then(
+			$this->request_options($model, $apiKey, $prompt, $timeoutSeconds, $systemPrompt))->then(
 				fn(ResponseInterface $response) => $this->parse_response($response),
 				fn() => null
 			);
@@ -37,7 +37,7 @@ class LLMClient {
 	/**
 	 * @return array<string, mixed>
 	 */
-	private function request_options(string $model, string $apiKey, string $prompt, int $timeoutSeconds): array {
+	private function request_options(string $model, string $apiKey, string $prompt, int $timeoutSeconds, ?string $systemPrompt = null): array {
 		$timeout = max(1, min($timeoutSeconds, self::MAX_TIMEOUT_SECONDS));
 
 		return [
@@ -53,7 +53,7 @@ class LLMClient {
 				'messages' => [
 					[
 						'role' => 'system',
-						'content' => self::SYSTEM_PROMPT,
+						'content' => $systemPrompt ?? self::SYSTEM_PROMPT,
 					],
 					[
 						'role' => 'user',

@@ -416,6 +416,184 @@ const Article = {
 	},
 	getUnderPointer: function () {
 		return this.post_under_pointer;
+	},
+	checkAndRenderDigest: function (feedId, digestEnabled) {
+		if (!digestEnabled) {
+			// Show empty state with enable button if AI might be configured
+			const content_insert = dijit.byId("content-insert");
+			const headlines_wrap = dijit.byId("headlines-wrap-inner");
+			if (content_insert) {
+				if (content_insert.getParent() !== headlines_wrap)
+					headlines_wrap.addChild(content_insert);
+				content_insert.attr("content", Article.emptyStateWithDigestPrompt(feedId));
+			}
+			return;
+		}
+
+		Article.renderDigestLoading();
+
+		xhr.json("backend.php", {op: "Feeds", method: "getDigest", feed_id: feedId}, (reply) => {
+			if (reply?.digest) {
+				Article.renderDigest(reply.digest, feedId);
+			} else if (reply?.error) {
+				Article.renderDigestError(reply.error, feedId);
+			} else {
+				Article.renderDigestError(__("Failed to load digest."), feedId);
+			}
+		});
+	},
+	emptyStateWithDigestPrompt: function (feedId) {
+		return `<div class="article-empty-state">
+			<i class="material-icons">article</i>
+			<h2>${App.escapeHtml(__("Pick an article to start reading."))}</h2>
+			<p>${App.escapeHtml(__("Select a headline from the timeline and it will open here."))}</p>
+			<button class="digest-enable-btn" onclick="Article.enableDigestForFeed(${feedId})">
+				<i class="material-icons">auto_awesome</i>
+				${App.escapeHtml(__("Enable AI Digest for this feed"))}
+			</button>
+		</div>`;
+	},
+	renderDigestLoading: function () {
+		const html = `<div class="article-digest-loading">
+			<i class="material-icons">auto_awesome</i>
+			<p>${App.escapeHtml(__("Generating AI digest..."))}</p>
+		</div>`;
+		const content_insert = dijit.byId("content-insert");
+		const headlines_wrap = dijit.byId("headlines-wrap-inner");
+		if (content_insert) {
+			if (content_insert.getParent() !== headlines_wrap)
+				headlines_wrap.addChild(content_insert);
+			content_insert.attr("content", html);
+		}
+	},
+	renderDigestError: function (message, feedId) {
+		const html = `<div class="article-digest-error">
+			<i class="material-icons">error_outline</i>
+			<h2>${App.escapeHtml(__("Digest unavailable"))}</h2>
+			<p>${App.escapeHtml(message)}</p>
+			<button onclick="Article.regenerateDigest(${feedId})">
+				<i class="material-icons">refresh</i>
+				${App.escapeHtml(__("Try again"))}
+			</button>
+			<button onclick="Article.disableDigest(${feedId})">
+				<i class="material-icons">block</i>
+				${App.escapeHtml(__("Disable AI Digest"))}
+			</button>
+		</div>`;
+		const content_insert = dijit.byId("content-insert");
+		const headlines_wrap = dijit.byId("headlines-wrap-inner");
+		if (content_insert) {
+			if (content_insert.getParent() !== headlines_wrap)
+				headlines_wrap.addChild(content_insert);
+			content_insert.attr("content", html);
+		}
+	},
+	renderDigest: function (digest, feedId) {
+		let entriesHtml = '';
+		const articles = digest.articles || [];
+		const totalUnread = digest.total_unread || 0;
+		const generatedAt = digest.generated_at || '';
+
+		if (articles.length === 0) {
+			entriesHtml = `<div class="digest-empty">
+				<i class="material-icons">inbox</i>
+				<p>${App.escapeHtml(__("No unread articles in the last 24 hours."))}</p>
+			</div>`;
+		} else {
+			entriesHtml = articles.map((entry) => {
+				const safeTitle = App.escapeHtml(entry.title || '');
+				const safeReason = App.escapeHtml(entry.reason || '');
+				const articleId = entry.id;
+				return `<div class="digest-entry" data-article-id="${articleId}">
+					<div class="digest-entry-title">
+						<a href="javascript:void(0)" onclick="Article.view(${articleId}); return false;">${safeTitle}</a>
+					</div>
+					<div class="digest-entry-reason">
+						<i class="material-icons">lightbulb</i>
+						${safeReason}
+					</div>
+				</div>`;
+			}).join('');
+		}
+
+		const timeStr = Article.formatDigestRelativeTime(generatedAt);
+
+		const html = `<div class="article-digest">
+			<div class="article-digest-header">
+				<div class="digest-header-left">
+					<i class="material-icons">auto_awesome</i>
+					<h2>${App.escapeHtml(__("AI Digest"))}</h2>
+					<span class="digest-subtitle">${__("%d articles selected from %d unread").replace('%d', articles.length).replace('%d', totalUnread)}</span>
+				</div>
+				<div class="digest-header-right">
+					<span class="digest-generated-at">${timeStr}</span>
+				</div>
+			</div>
+			<div class="article-digest-list">
+				${entriesHtml}
+			</div>
+			<div class="article-digest-footer">
+				<button onclick="Article.regenerateDigest(${feedId})">
+					<i class="material-icons">refresh</i>
+					${App.escapeHtml(__("Regenerate"))}
+				</button>
+				<button onclick="Article.disableDigest(${feedId})">
+					<i class="material-icons">block</i>
+					${App.escapeHtml(__("Disable"))}
+				</button>
+			</div>
+		</div>`;
+
+		const content_insert = dijit.byId("content-insert");
+		const headlines_wrap = dijit.byId("headlines-wrap-inner");
+		if (content_insert) {
+			if (content_insert.getParent() !== headlines_wrap)
+				headlines_wrap.addChild(content_insert);
+			content_insert.attr("content", html);
+		}
+	},
+	enableDigestForFeed: function (feedId) {
+		xhr.json("backend.php", {op: "Feeds", method: "toggleDigest", feed_id: feedId, enabled: true}, () => {
+			Article.checkAndRenderDigest(feedId, true);
+		});
+	},
+	disableDigest: function (feedId) {
+		xhr.json("backend.php", {op: "Feeds", method: "toggleDigest", feed_id: feedId, enabled: false}, () => {
+			const content_insert = dijit.byId("content-insert");
+			const headlines_wrap = dijit.byId("headlines-wrap-inner");
+			if (content_insert) {
+				if (content_insert.getParent() !== headlines_wrap)
+					headlines_wrap.addChild(content_insert);
+				content_insert.attr("content", Article.emptyState());
+			}
+		});
+	},
+	regenerateDigest: function (feedId) {
+		Article.renderDigestLoading();
+		xhr.json("backend.php", {op: "Feeds", method: "getDigest", feed_id: feedId, regenerate: true}, (reply) => {
+			if (reply?.digest) {
+				Article.renderDigest(reply.digest, feedId);
+			} else {
+				Article.renderDigestError(reply?.error || __("Failed to regenerate digest."), feedId);
+			}
+		});
+	},
+	formatDigestRelativeTime: function (generatedAt) {
+		if (!generatedAt) return '';
+		try {
+			const gen = new Date(generatedAt.replace(' ', 'T') + 'Z');
+			const now = new Date();
+			const diffMs = now - gen;
+			const diffMin = Math.floor(diffMs / 60000);
+			if (diffMin < 1) return __('Just now');
+			if (diffMin < 60) return __('%d min ago').replace('%d', diffMin);
+			const diffHr = Math.floor(diffMin / 60);
+			if (diffHr < 24) return __('%d hr ago').replace('%d', diffHr);
+			const diffDay = Math.floor(diffHr / 24);
+			return __('%d days ago').replace('%d', diffDay);
+		} catch {
+			return '';
+		}
 	}
 }
 

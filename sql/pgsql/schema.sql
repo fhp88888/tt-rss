@@ -114,8 +114,8 @@ create table ttrss_feeds (id serial not null primary key,
 	favicon_last_checked timestamp default null,
 	feed_language varchar(100) not null default '',
 	auth_pass_encrypted boolean not null default false,
-	unique(feed_url, owner_uid));
-
+		ai_digest_enabled boolean not null default false,
+		unique(feed_url, owner_uid));
 create index ttrss_feeds_owner_uid_index on ttrss_feeds(owner_uid);
 create index ttrss_feeds_cat_id_idx on ttrss_feeds(cat_id);
 
@@ -409,6 +409,15 @@ create table ttrss_error_log(
 	lineno integer not null,
 	context text not null,
 	created_at timestamp not null);
+
+create table ttrss_ai_digests (
+	feed_id integer not null references ttrss_feeds(id) on delete cascade,
+	owner_uid integer not null references ttrss_users(id) on delete cascade,
+	content jsonb not null,
+	generated_at timestamp not null default now(),
+	primary key (feed_id, owner_uid));
+
+create index ttrss_ai_digests_generated_at_idx on ttrss_ai_digests(generated_at);
 
 create table ttrss_scheduled_tasks(
 	id serial not null primary key,

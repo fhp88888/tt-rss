@@ -468,6 +468,9 @@ const	Feeds = {
 					this.showLoading(feed, is_cat, false);
 					Headlines.onLoaded(reply, offset, append);
 					PluginHost.run(PluginHost.HOOK_FEED_LOADED, [feed, is_cat]);
+					if (!is_cat && feed > 0 && !offset) {
+						Article.checkAndRenderDigest(feed, reply?.headlines?.ai_digest_enabled || false);
+					}
 				} catch (e) {
 					App.Error.report(e);
 				}
